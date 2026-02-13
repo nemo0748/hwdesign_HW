@@ -1,6 +1,6 @@
 ---
 title: Submitting the Lab
-parent: Cubic Fixed Poin
+parent: Cubic Fixed Point
 nav_order: 5
 has_children: true
 ---
