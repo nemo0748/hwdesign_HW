@@ -57,6 +57,12 @@ module tb_cubic;
     // DUT internal signals for debugging
     logic signed [WID-1:0] x_dut;
 
+    // Version flag
+    // Set to 0 to use original $fscanf format (decimal, signed)
+    // Set to 1 to read values one at a time to avoid Vivado 2023.2 
+    // $fscanf bug with negative numbers
+    int version = 1;
+
     initial begin
         // Initialize
         rst = 0;
@@ -113,13 +119,28 @@ module tb_cubic;
         repeat (3) @(posedge clk);
 
         line_num = 0;
-        
+ 
         // Read test vectors from CSV file
         while (!$feof(file_handle)) begin
-            // Read CSV line: xint,aint0,aint1,aint2,y,yint,yfix
-            scan_result = $fscanf(file_handle, "%d,%d,%d,%d,%f,%d,%f\n", 
-                                  xint, aint0, aint1, aint2, y_float, yint_expected, yfix_expected);
+            if (version == 0) begin
+                // Original fscanf format (decimal, signed)
+                // Note: This does not work in Vivado 2023.2 due to a bug in $fscanf when reading negative numbers.
+                // Read CSV line: xint,aint0,aint1,aint2,y,yint,yfix
+                scan_result = $fscanf(file_handle, "%d,%d,%d,%d,%f,%d,%f\n", 
+                                xint, aint0, aint1, aint2, y_float, yint_expected, yfix_expected);
 
+            end else begin
+                // Here we read the values one at a time to avoid the Vivado 2023.2 $fscanf 
+                // bug with multiple negative numbers. 
+                // https://adaptivesupport.amd.com/s/question/0D54U000080bmlESAQ/sscanf-and-fscanf-broken-in-vivado-20232-when-parsing-negative-numbers?language=en_US  
+                scan_result  = $fscanf(file_handle, "%d,", xint);
+                scan_result += $fscanf(file_handle, "%d,", aint0);
+                scan_result += $fscanf(file_handle, "%d,", aint1);
+                scan_result += $fscanf(file_handle, "%d,", aint2);
+                scan_result += $fscanf(file_handle, "%f,", y_float);
+                scan_result += $fscanf(file_handle, "%d,", yint_expected);
+                scan_result += $fscanf(file_handle, "%f\n", yfix_expected);
+            end
             if (scan_result != 7) begin
                 // End of file or incomplete line
                 break;
