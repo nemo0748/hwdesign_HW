@@ -31,8 +31,9 @@ A tentative set of units is as follows.  I've only added a few units so far, but
     * Lab:  [Fixed point implementation of a polynomial](../labs/cubic/)
 * Unit 4:  Bus Basics and Memory-Mapped Interfaces
     * Lecture:  [[PDF]](https://github.com/sdrangan/hwdesign/tree/main/units/unit04_procif/procif.pdf) [[pptx]](https://github.com/sdrangan/hwdesign/tree/main/units/unit04_procif/procif.pptx) 
-    * [Problems](../../units/unit04_procif/prob/procif.html)
     * [Vitis HLS Demo:  Simple AXI4-Lite interface](../demos/procif/) 
+    * Lab:  [Build a root solving accelerator in Vitis HLS](../labs/rootsolve/)
+    * [Problems](../../units/unit04_procif/prob/procif.html)
 * Unit 5:  FIFO and Streaming Interfaces
     * [Vitis HLS Demo: AXI4-Streaming FIFO interface](../demos/fifoif/)
 * Unit 6:  Timing Diagrams and Critical Path Analysis
