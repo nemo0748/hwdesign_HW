@@ -76,17 +76,19 @@ have been configured to have the correct paths by default.
         * On Linux: `source <vitis_path>/settings64.sh`
         * On Windows: `<vitis_path>/settings64.bat` 
 *  Now run the Vitis command.  The command will depend on the version that you are using:
+
     - If you are using Vitis 2025.1 or later (the recommended version if you installed Vitis HLS on your local machine), the command is:
 
-```bash
-vitis-run --mode hls --tcl run_hls.tcl
-```
+    ```bash
+    vitis-run --mode hls --tcl run_hls.tcl
+    ```
+
     - If you are running on the [NYU remote server](../../support/nyuremote/),
     the server has an older 2023.2 version.  In this case, the command syntax is:
 
-```bash
-vitis_hls -f run_hls.tcl
-```
+    ```bash
+    vitis_hls -f run_hls.tcl
+    ```
 
 ## Checking the Test Outputs 
 

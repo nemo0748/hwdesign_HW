@@ -7,7 +7,7 @@ has_children: true
 
 ## Labs
 As part of the class, we are building a few labs in both SystemVerilog and Vitis HLS.
-Unfortunately, we only have one lab so far.  But, we will add more over the course of the
+Unfortunately, we only have a few labs so far.  But, we will add more over the course of the
 semester.
 
 * [Unit 2: Division with conditional subtraction](./subc/)
@@ -16,6 +16,9 @@ semester.
 * [Unit 3:  Fixed point implementation of a cubic function](./cubic/)
    * Implement a simple function in fixed point in SystemVerilog
    and validate against a python Golden model
+* [Unit 4:  Root solver for a nonlinear function](./rootsolve/)
+   * Implement a simple iterative root solver accelerator in Vitis HLS and optionally
+   connect to a processor.
 
 
 

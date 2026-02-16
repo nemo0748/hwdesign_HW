@@ -23,7 +23,7 @@ hwdesign/labs/rootsolve/partial/rootsolve.ipynb
 to
 
 ```bash
-hwdesign/labs/rootsolve/cubic.ipynb
+hwdesign/labs/rootsolve/rootsolve.ipynb
 ```
 
 Then complete this notebook to:
@@ -56,7 +56,7 @@ is sufficiently small.
 
 ----
 
-Go to [Building the VITIS HLS](./vitis.md).
+Go to [Building the VITIS HLS](./vitis_build.md).
 
 
 
