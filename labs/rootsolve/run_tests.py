@@ -252,7 +252,7 @@ def submit(
     tv_dir = os.path.join(os.getcwd(), 'test_outputs')
     zip_files = [ os.path.join(os.getcwd(),'fsolve.cpp'),\
                 os.path.join(os.getcwd(),'tb_fsolve.cpp'),\
-                os.path.join(os.getcwd(),'fsolve.ipynb'),\
+                os.path.join(os.getcwd(),'rootsolve.ipynb'),\
                 os.path.join(tv_dir, 'tv_csim.csv'),\
                 os.path.join(tv_dir, 'tv_rtl.csv'),\
                 os.path.join(tv_dir, 'tv_python.csv'),\
