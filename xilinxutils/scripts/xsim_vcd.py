@@ -16,6 +16,8 @@ Arguments:
     --top    (required) Name of the top-level function to simulate
     --comp   (optional) Name of the HLS component directory (default: 'hls_component')
     --out    (optional) Output VCD filename (default: 'dump.vcd')
+    --trace_level (optional) VCD trace level (default: '*' corresponds to all signals.
+      You can also specify 'port' or '/top_function/*' for more specific tracing.)
 
 Example:
 ```bash
@@ -34,14 +36,14 @@ import re
 import argparse
 
 
-def modify_tcl(tcl_path, tcl_vcd_path):
+def modify_tcl(tcl_path, tcl_vcd_path, trace_level):
     with open(tcl_path, 'r') as f:
         lines = f.readlines()
 
     # Insert VCD commands before log_wave
     for i, line in enumerate(lines):
         if 'log_wave -r /' in line:
-            lines = lines[:i] + ['open_vcd\n', 'log_vcd *\n'] + lines[i:]
+            lines = lines[:i] + ['open_vcd\n', f'log_vcd {trace_level}\n'] + lines[i:]
             break
 
     # Replace final lines
@@ -103,6 +105,18 @@ def parse_args():
         default="dump.vcd",
         help="Output VCD filename (default: dump.vcd)"
     )
+    parser.add_argument(
+        "--soln",
+        type=str,
+            default="solution1",
+        help="Solution name (default: solution1)"
+    )
+    parser.add_argument(
+        "--trace_level",
+        type=str,
+        default="*",
+        help="VCD trace level (default: *)"
+    )
     return parser.parse_args()
 
 
@@ -118,11 +132,49 @@ def main():
     component_name = args.comp
     top_name = args.top
     output_vcd = args.out
+    solution_name = args.soln
+    trace_level = args.trace_level
 
     # Get directory paths
-    component_path = os.path.join(component_name, top_name)
     base_dir = os.getcwd()
-    sim_dir = os.path.join(base_dir, component_path, 'hls', 'sim', 'verilog')
+    component_path = os.path.join(base_dir, component_name)
+
+    # Set soln_path to either the provided component_path/solution or name
+    # or the fisrt directory below component_path.  If there are multiple directories,
+    # print an error and list the sub-directories.
+    if solution_name is None:
+        subdirs = [d for d in os.listdir(component_path) if os.path.isdir(os.path.join(component_path, d))]
+        if len(subdirs) == 0:
+            print(f"❌ No subdirectories found in {component_path}. Please specify a solution name with --soln.")
+            sys.exit(1)
+        elif len(subdirs) > 1:
+            print(f"❌ Multiple subdirectories found in {component_path}. Please specify a solution name with --soln.")
+            print("Subdirectories:")
+            for d in subdirs:
+                print(f"  - {d}")
+            sys.exit(1)
+        else:
+            solution_name = subdirs[0]
+    soln_path = os.path.join(component_path, solution_name) 
+
+
+    # Get candidate sim directories
+    sim_dir_candidates = [
+        os.path.join(soln_path, 'hls', 'sim', 'verilog'),
+        os.path.join(soln_path, 'sim', 'verilog')
+    ]
+    # Test if any of the candidate directories exist.  If not, print an error and exit.
+    found_sim_dir = False
+    for sim_dir in sim_dir_candidates:
+        if os.path.exists(sim_dir):
+            found_sim_dir = True
+            break
+    if not found_sim_dir:
+        print("❌ No valid simulation directory found. Please check your solution structure.")
+        print("Checked the following directories: ")
+        for d in sim_dir_candidates:
+            print(f"  - {d}")
+        sys.exit(1)
 
 
     tcl_path = os.path.join(sim_dir, f'{top_name}.tcl')
@@ -134,7 +186,7 @@ def main():
         if not os.path.exists(sim_dir):
             raise FileNotFoundError(f"Simulation directory not found: {sim_dir}")
 
-        modify_tcl(tcl_path, tcl_vcd_path)
+        modify_tcl(tcl_path, tcl_vcd_path, trace_level)
         create_vcd_batch(top_name, bat_path, bat_vcd_path)
         run_batch(bat_vcd_path)
         copy_vcd(sim_dir, base_dir, component_path, output_vcd)

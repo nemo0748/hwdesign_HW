@@ -319,7 +319,8 @@ class VcdParser(object):
     def add_axiss_signals(
             self,
             name : str | None = None,
-            short_name_prefix : str | None = None) -> dict[str, str]:
+            short_name_prefix : str | None = None,
+            ignore_multiple : bool = False) -> dict[str, str]:
         """
         Adds signals that are part of an AXI4-Stream interface.
 
@@ -329,6 +330,8 @@ class VcdParser(object):
             If provided, only signals containing this substring are considered.
         short_name_prefix : str | None
             If provided, this prefix is added to the short names of the signals.
+        ignore_multiple : bool
+            If True, if multiple signals are found for an AXI4-Stream keyword, the first one is used and a warning is printed.  If False, an error is raised.
 
         Returns
         -------
@@ -344,7 +347,11 @@ class VcdParser(object):
             for s in self.vcd.signals:
                 if kw in s.lower() and (name is None or name in s):
                     if axi_sigs[kw] is not None:
-                        raise ValueError(f"Multiple signals found for AXI4-Stream keyword '{kw}'.")
+                        if ignore_multiple:
+                            print(f"Warning: Multiple signals found for AXI4-Stream keyword '{kw}'. Using '{axi_sigs[kw]}' and ignoring '{s}'.")
+                            continue
+                        else:
+                            raise ValueError(f"Multiple signals found for AXI4-Stream keyword '{kw}'.")
                     axi_sigs[kw] = s
                     self.add_signal(s)
                     if short_name_prefix:
@@ -354,7 +361,9 @@ class VcdParser(object):
                     else:  
                         short_name = kw.upper()
                     self.sig_info[s].short_name = short_name
-            if axi_sigs[kw] is None:
+
+            # Check if signal is found, except 'tlast' which is optional.
+            if (axi_sigs[kw] is None) and (kw != 'tlast'):
                 raise ValueError(f"No signal found for AXI4-Stream keyword '{kw}'.")
             
         # Get the bitwidth from the TDATA signal.

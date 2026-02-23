@@ -1,32 +1,26 @@
-#ifndef CMD_H
-#define CMD_H
+#ifndef RESP_HDR_H
+#define RESP_HDR_H
 
 #include <hls_stream.h>
 #include <ap_int.h>
 #include <ap_axi_sdata.h>
-#include "../../../../xilinxutils/codegen/stream_utils.h"
+#include "stream_utils.h"
 #include <string>
 #include <sstream>
 
-class Cmd {
+class RespHdr {
 public:
 
     ap_int<16> trans_id; // Transaction ID
-    ap_int<32> a; // Operand A
-    ap_int<32> b; // Operand B
 
     template<typename Tstream>
     bool stream_read_32(hls::stream<Tstream>& in) {
         constexpr int bus_bits = decltype(Tstream::data)::width;
-        static_assert(bus_bits == 32, "Only 32-bit stream supported in Cmd::stream_read_32");
+        static_assert(bus_bits == 32, "Only 32-bit stream supported in RespHdr::stream_read_32");
 
         Tstream w0 = in.read();
         trans_id = w0.data.range(15, 0);
-        Tstream w1 = in.read();
-        a = w1.data;
-        Tstream w2 = in.read();
-        b = w2.data;
-        bool tlast = w2.last;
+        bool tlast = w0.last;
 
         return tlast;
     }
@@ -34,27 +28,20 @@ public:
     template<typename Tstream>
     void stream_write_32(hls::stream<Tstream>& out, bool tlast = true) const {
         constexpr int bus_bits = decltype(Tstream::data)::width;
-        static_assert(bus_bits == 32, "Only 32-bit stream supported in Cmd::stream_write_32");
+        static_assert(bus_bits == 32, "Only 32-bit stream supported in RespHdr::stream_write_32");
 
-        out.write(axi_word_range<Tstream>(trans_id, 15, 0, false));
-
-        out.write(axi_word<Tstream>(a, false));
-
-        out.write(axi_word<Tstream>(b, tlast));
+        out.write(axi_word_range<Tstream>(trans_id, 15, 0, tlast));
 
     }
 
     template<typename Tstream>
     bool stream_read_64(hls::stream<Tstream>& in) {
         constexpr int bus_bits = decltype(Tstream::data)::width;
-        static_assert(bus_bits == 64, "Only 64-bit stream supported in Cmd::stream_read_64");
+        static_assert(bus_bits == 64, "Only 64-bit stream supported in RespHdr::stream_read_64");
 
         Tstream w0 = in.read();
         trans_id = w0.data.range(15, 0);
-        a = w0.data.range(47, 16);
-        Tstream w1 = in.read();
-        b = w1.data.range(31, 0);
-        bool tlast = w1.last;
+        bool tlast = w0.last;
 
         return tlast;
     }
@@ -62,24 +49,9 @@ public:
     template<typename Tstream>
     void stream_write_64(hls::stream<Tstream>& out, bool tlast = true) const {
         constexpr int bus_bits = decltype(Tstream::data)::width;
-        static_assert(bus_bits == 64, "Only 64-bit stream supported in Cmd::stream_write_64");
+        static_assert(bus_bits == 64, "Only 64-bit stream supported in RespHdr::stream_write_64");
 
-        Tstream w0;
-        w0.data = 0;
-        w0.keep = -1;
-        w0.strb = -1;
-        w0.data.range(15, 0) = trans_id;
-        w0.data.range(47, 16) = a;
-        w0.last = false;
-        out.write(w0);
-
-        Tstream w1;
-        w1.data = 0;
-        w1.keep = -1;
-        w1.strb = -1;
-        w1.data.range(31, 0) = b;
-        w1.last = tlast;
-        out.write(w1);
+        out.write(axi_word_range<Tstream>(trans_id, 15, 0, tlast));
 
     }
 
@@ -110,20 +82,18 @@ public:
         }
     }
 
-    bool operator==(const Cmd& other) const {
-        return (this->trans_id == other.trans_id) && (this->a == other.a) && (this->b == other.b);
+    bool operator==(const RespHdr& other) const {
+        return (this->trans_id == other.trans_id);
     }
 
     std::string to_string() const {
         std::ostringstream oss;
         oss << "{";
-        oss << "trans_id: " << trans_id << ", ";
-        oss << "a: " << a << ", ";
-        oss << "b: " << b;
+        oss << "trans_id: " << trans_id;
         oss << "}";
         return oss.str();
     }
 
 };
 
-#endif // CMD_H
+#endif // RESP_HDR_H

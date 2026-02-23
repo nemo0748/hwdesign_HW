@@ -4,6 +4,48 @@ import numpy as np
 import fixedpoint
 from enum import Enum
 from typing import Type
+from numpy.typing import NDArray
+
+def float_to_uint(
+    fval: NDArray[np.floating]) -> NDArray[np.uint32]:
+    """
+    Converts a float value to its unsigned integer (bit representation).
+    
+    Parameters
+    ----------
+    fval : nd.array
+        Float value to convert to bit representation.
+        
+    Returns
+    -------
+    uint_val : nd.array of np.uint32
+        Unsigned integer representation of the float's bit pattern.
+    """
+    # Convert to np.float32 array to ensure 32-bit float representation
+    f32 = np.asarray(fval, dtype=np.float32)
+    # Use view to get the bit pattern as uint32
+    return f32.view(np.uint32)
+
+
+def uint_to_float(
+    uval: NDArray[np.unsignedinteger]) -> NDArray[np.float32]:
+    """
+    Converts an unsigned integer bit pattern to float32 values.
+
+    Parameters
+    ----------
+    uval : nd.array
+        Unsigned integer array containing IEEE-754 float bit patterns.
+
+    Returns
+    -------
+    fval : nd.array of np.float32
+        Float values reconstructed from the input bit patterns.
+    """
+    # Convert to np.uint32 array to ensure 32-bit word representation
+    u32 = np.asarray(uval, dtype=np.uint32)
+    # Use view to interpret bits as float32
+    return u32.view(np.float32)
 
 
 class BaseType:
@@ -287,11 +329,8 @@ class FloatType(BaseType):
             high = ind0 + self.width - 1
             src_expr = f"{word_name}.range({high}, {ind0})"
 
-        return (
-            "union { float f; ap_uint<32> u; } conv;\n"
-            f"        conv.u = {src_expr};\n"
-            f"        /* assign to variable */ conv.f"
-        )
+        # Use class utility generated in gen_include()
+        return f"uint_to_float({src_expr})"
 
     def write_expr_impl(self,
                         var_name: str,
@@ -310,11 +349,7 @@ class FloatType(BaseType):
             raise ValueError("Float field does not fit in word")
 
         high = ind0 + self.width - 1
-        return (
-            "union { float f; ap_uint<32> u; } conv;\n"
-            f"        conv.f = {var_name};\n"
-            f"        {word_name}.range({high}, {ind0}) = conv.u;"
-        )
+        return f"{word_name}.range({high}, {ind0}) = float_to_uint({var_name});"
     
     def init_python_value(self):
         """
@@ -549,6 +584,45 @@ class VitisStruct(object):
         for f in self.fields:
             self.data[f.name] = f.dtype.init_python_value()
 
+    def get_length(self, bus_width: int = 32) -> int:
+        """
+        Get the number of stream words needed to represent this struct for a given bus width.
+
+        Parameters
+        ----------
+        bus_width : int
+            Bitwidth of the stream word.
+
+        Returns
+        -------
+        int
+            Number of stream words needed.
+        """
+        # Check that no field exceeds bus width
+        for f in self.fields:
+            if f.dtype.width > bus_width:
+                raise ValueError(
+                    f"Field '{f.name}' has width {f.dtype.width} bits, "
+                    f"which exceeds bus width {bus_width} bits"
+                )
+            if f.dtype.width > 32:
+                raise ValueError(
+                    f"Field '{f.name}' has width {f.dtype.width} bits. "
+                    "stream_utils helpers require field widths <= 32 bits"
+                )
+
+        # Pack fields into words using the same logic as gen_stream_write
+        nwords = 0
+        ind0 = 0
+        for f in self.fields:
+            bw = f.dtype.width
+            if ind0 == 0 or (ind0 + bw > bus_width):
+                nwords += 1
+                ind0 = 0
+            ind0 += bw
+
+        return nwords
+
     def write_stream(self, bus_width: int = 32):
         """
         Generate a vector of unint<32> words representing this struct. 
@@ -668,19 +742,13 @@ class VitisCodeGen(object):
         self.name = vs.name
         self.fields = vs.fields
         self.stream_bus_widths = []
-
-    #def cpp_decl(self) -> str:
-    #    decl_lines = [f"struct {self.name} {{"]
-    #    for field in self.fields:
-    #        decl_lines.append(field.cpp_decl())
-    #    decl_lines.append("};")
-    #    return "\n".join(decl_lines)
-    
+   
     def gen_include(
         self,
         include_file: None | str = None,
         include_dir: None | str = None,
-        bus_widths: list[int] | None = None
+        bus_widths: list[int] | None = None,
+        copy_stream_utils: bool = True
     ) -> str: 
         """
         Generate and write the C++ include file for this data structure.
@@ -712,6 +780,8 @@ class VitisCodeGen(object):
         bus_widths : list[int] | None
             List of bus widths to generate stream functions for.
             If None, defaults to [32].
+        copy_stream_utils : bool
+            Whether to copy the stream_utils.h file to the include directory.
 
         Returns
         -------
@@ -721,10 +791,17 @@ class VitisCodeGen(object):
         import os
         
         # Set defaults
-        if include_dir is None:
-            include_dir = os.getcwd()
         if include_file is None:
-            include_file = f"{self.name.lower()}.h"
+            if include_dir is None:
+                include_dir = os.getcwd()
+            include_file = os.path.join(include_dir, f"{self.name.lower()}.h")
+        elif not os.path.isabs(include_file):
+            if include_dir is None:
+                include_dir = os.getcwd()
+            include_file = os.path.join(include_dir, include_file)
+
+        include_file = os.path.abspath(include_file)
+        include_dir = os.path.dirname(include_file)
         if bus_widths is None:
             bus_widths = [32]
         
@@ -735,12 +812,12 @@ class VitisCodeGen(object):
         os.makedirs(include_dir, exist_ok=True)
         
         # Delete existing file if it exists
-        file_path = os.path.join(include_dir, include_file)
+        file_path = include_file
         if os.path.exists(file_path):
             os.remove(file_path)
         
-        # Generate include guard macro name
-        guard_name = include_file.upper().replace('.', '_').replace('-', '_')
+        # Generate include guard macro name from file basename
+        guard_name = os.path.basename(include_file).upper().replace('.', '_').replace('-', '_')
         
         # Build the file content
         lines = []
@@ -754,6 +831,12 @@ class VitisCodeGen(object):
         lines.append("#include <hls_stream.h>")
         lines.append("#include <ap_int.h>")
         lines.append("#include <ap_axi_sdata.h>")
+        stream_utils_path = os.path.join(os.path.dirname(__file__), "codegen", "stream_utils.h")
+        # Copy stream_utils.h to include directory
+        if copy_stream_utils:
+            import shutil
+            shutil.copyfile(stream_utils_path, os.path.join(include_dir, "stream_utils.h"))
+        lines.append("#include \"stream_utils.h\"")    
         lines.append("#include <string>")
         lines.append("#include <sstream>")
         lines.append("")
@@ -773,7 +856,7 @@ class VitisCodeGen(object):
         for field in self.fields:
             lines.append(field.cpp_decl())
         lines.append("")
-        
+    
         # Generate stream functions for each bus width
         for bus_width in bus_widths:
             # Generate stream_read
@@ -891,6 +974,11 @@ class VitisCodeGen(object):
                     f"Field '{f.name}' has width {f.dtype.width} bits, "
                     f"which exceeds bus width {bus_width} bits"
                 )
+            if f.dtype.width > 32:
+                raise ValueError(
+                    f"Field '{f.name}' has width {f.dtype.width} bits. "
+                    "stream_utils helpers require field widths <= 32 bits"
+                )
     
         lines = []
         lines.append("    template<typename Tstream>")
@@ -900,56 +988,82 @@ class VitisCodeGen(object):
                     f"\"Only {bus_width}-bit stream supported in {self.name}::stream_write_{bus_width}\");")
         lines.append("")
 
-        ind0 = 0       # current bit index within the word
-        word_count = 0 # count of words written
-        word_var = None
-        total_words = 0  # track total number of words needed
-
-        # First pass: determine total number of words needed
-        temp_ind = 0
-        temp_count = 0
+        # Pack fields into stream words
+        words = []
+        current_word = []
+        ind0 = 0
         for f in self.fields:
             bw = f.dtype.width
-            if temp_ind + bw > bus_width or temp_count == 0:
-                temp_count += 1
-                temp_ind = bw
-            else:
-                temp_ind += bw
-        total_words = temp_count
-
-        # Second pass: generate the write code
-        for f in self.fields:
-            bw = f.dtype.width
-
-            # If field doesn't fit in current word, write current word and start a new one
-            if ind0 + bw > bus_width or word_var is None:
-                # Write the previous word if it exists
-                if word_var is not None:
-                    is_last = word_count == total_words
-                    lines.append(f"        {word_var}.last = false;")
-                    lines.append(f"        out.write({word_var});")
-                    lines.append("")
-                
-                # Start a new word
-                word_count += 1
-                word_var = f"w{word_count - 1}"
-                lines.append(f"        Tstream {word_var};")
-                lines.append(f"        {word_var}.data = 0;")
-                lines.append(f"        {word_var}.keep = -1;")
-                lines.append(f"        {word_var}.strb = -1;")
+            if current_word and (ind0 + bw > bus_width):
+                words.append(current_word)
+                current_word = []
                 ind0 = 0
-
-            # Generate write expression using field's write_expr
-            write_stmt = f.dtype.write_expr(f.name, word_var + ".data", bus_width, ind0)
-            lines.append(f"        {write_stmt}")
-
-            # Advance bit index
+            current_word.append((f, ind0))
             ind0 += bw
+        if current_word:
+            words.append(current_word)
 
-        # Write the final word
-        if word_var is not None:
-            lines.append(f"        {word_var}.last = tlast;")
-            lines.append(f"        out.write({word_var});")
+        # Use shared AXI helpers for all supported bus widths.
+        # We assume each individual field is <= 32 bits.
+        for i, word_fields in enumerate(words):
+            is_last_word = (i == len(words) - 1)
+            last_arg = "tlast" if is_last_word else None
+
+            if len(word_fields) == 1:
+                f, field_ind0 = word_fields[0]
+                bw = f.dtype.width
+
+                if isinstance(f.dtype, FloatType):
+                    value_expr = f"float_to_uint({f.name})"
+                else:
+                    value_expr = f"{f.name}"
+
+                if field_ind0 == 0 and bw == 32:
+                    if last_arg is None:
+                        lines.append(f"        out.write(axi_word<Tstream>({value_expr}));")
+                    else:
+                        lines.append(f"        out.write(axi_word<Tstream>({value_expr}, {last_arg}));")
+                else:
+                    high = field_ind0 + bw - 1
+                    if last_arg is None:
+                        lines.append(
+                            f"        out.write(axi_word_range<Tstream>({value_expr}, {high}, {field_ind0}));"
+                        )
+                    else:
+                        lines.append(
+                            f"        out.write(axi_word_range<Tstream>({value_expr}, {high}, {field_ind0}, {last_arg}));"
+                        )
+            else:
+                word_var = f"w{i}"
+                first_f, first_ind0 = word_fields[0]
+                first_bw = first_f.dtype.width
+
+                if isinstance(first_f.dtype, FloatType):
+                    first_value_expr = f"float_to_uint({first_f.name})"
+                else:
+                    first_value_expr = f"{first_f.name}"
+
+                if first_ind0 == 0 and first_bw == 32:
+                    if last_arg is None:
+                        lines.append(f"        Tstream {word_var} = axi_word<Tstream>({first_value_expr});")
+                    else:
+                        lines.append(f"        Tstream {word_var} = axi_word<Tstream>({first_value_expr}, {last_arg});")
+                else:
+                    first_high = first_ind0 + first_bw - 1
+                    if last_arg is None:
+                        lines.append(
+                            f"        Tstream {word_var} = axi_word_range<Tstream>({first_value_expr}, {first_high}, {first_ind0});"
+                        )
+                    else:
+                        lines.append(
+                            f"        Tstream {word_var} = axi_word_range<Tstream>({first_value_expr}, {first_high}, {first_ind0}, {last_arg});"
+                        )
+
+                for f, field_ind0 in word_fields[1:]:
+                    write_stmt = f.dtype.write_expr(f.name, word_var + ".data", bus_width, field_ind0)
+                    lines.append(f"        {write_stmt}")
+                lines.append(f"        out.write({word_var});")
+            lines.append("")
 
         lines.append("    }")
         return "\n".join(lines)
