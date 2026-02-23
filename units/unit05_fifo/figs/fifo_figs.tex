@@ -1,0 +1,93 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath, amssymb, bm, cite, epsfig, psfrag}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{pgf,tikz}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{siunitx}
+\usepackage{../../styles/course}
+
+
+\begin{document}
+
+\title{Introduction to Hardware Design\\
+Processor Interface:  Figures and Code Snippets}
+\author{Profs. Sundeep Rangan, Siddharth Garg}
+\date{}
+
+\maketitle
+\subsection{Vitis vs. HLS}
+
+This is HLS code
+\begin{systemverilogcode}
+    module relu_lin (
+      input logic int x,
+      input logic int a,
+      input logic int b,
+      output logic int y
+    );
+      always_comb begin
+        logic int mult_out, add_out;
+        mult_out = x * a;
+        add_out = mult_out + b;
+        y = (add_out > 0) ? add_out : 0;
+      end
+    endmodule
+  \end{systemverilogcode}
+
+  This is equivalent C code:
+  \begin{ccode}
+    void relu_lin(int x, int a, int b, int &y) {
+      int mult_out = x * a;
+      int add_out = mult_out + b;
+      if (add_out > 0) {
+        y = add_out;
+      } else {
+        y = 0;
+      }
+    }
+  \end{ccode}
+
+  \subsection{Replacement code}
+  \begin{ccode}
+    // Compute x0 -> x1 -> x2
+    easy_function1(x0, x1);  
+    easy_function2(x1, x2); 
+
+    // Compute x2 -> x3
+    hard_function(x2, x3);  
+
+    // Compute x3 -> x4
+    easy_function3(x3, x4); 
+  \end{ccode}
+
+  \begin{systemverilogcode}
+  module hard_function(...);
+     ... 
+  endmodule
+  \end{systemverilogcode}
+
+  \pagebreak
+  \begin{ccode}
+  void poly_stream(
+      // Input and output data (AXI4 streams)
+      hls::stream<float> &in_stream,
+      hls::stream<float> &out_stream,
+
+      // AXI4-Lite control
+      float a0,
+      float a1,
+      float a2
+  ) 
+  \end{ccode}
+  \end{document}
+
+  
+

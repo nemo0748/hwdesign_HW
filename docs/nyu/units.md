@@ -35,12 +35,12 @@ A tentative set of units is as follows.  I've only added a few units so far, but
     * Lab:  [Build a root solving accelerator in Vitis HLS](../labs/rootsolve/)
     * [Problems](../../units/unit04_procif/prob/procif.html)
 * Unit 5:  FIFO and Streaming Interfaces
+    * Lecture:  [[PDF]](https://github.com/sdrangan/hwdesign/tree/main/units/unit05_fifo/fifo.pdf) [[pptx]](https://github.com/sdrangan/hwdesign/tree/main/units/unit04_fifo/fifo.pptx) 
     * [Vitis HLS Demo: AXI4-Streaming FIFO interface](../demos/fifoif/)
+    * [Problems](../../units/unit05_fifo/prob/fifo.html)
 * Unit 6:  Timing Diagrams and Critical Path Analysis
-* Unit 7:  Burst Transfers and Loop Optimization
+* Unit 7:  Pipelining and Loop Optimization
     * [Vitis HLS Demo: A pipelined vector multiplier](../demos/loopopt)
-* Unit 8:  FIR Filters
-* Unit 9:  Systolic Arrays
+* Unit 8:  Systolic Arrays
+* Unit 9:  Dataflow and Shared Memory architectures
 * Unit 10:  Multi-Threaded Control
-* Unit 11:  Dataflow and message-passing architectures
-* Unit 12:  Interfacing with high-speed sample 
