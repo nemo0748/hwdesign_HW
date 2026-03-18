@@ -1,7 +1,7 @@
 ---
 title: Conjugate Gradient Matrix Inverse
 parent: Example Projects
-nav_order: 1
+nav_order: 2
 has_children: false
 ---
 

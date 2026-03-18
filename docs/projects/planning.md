@@ -1,21 +1,21 @@
 ---
 title: Plannng the Project
 parent: Project
-nav_order: 1
+nav_order: 2
 has_children: false
 ---
 
-# AI-Based Planning of your Project
+## AI‑Based Planning of Your Project
 
-## Overview
+### Overview
 
-Given the limited time remaining this semester, we will structure the project planning process into **two submissions** before the final implementation:
+As described before, the project is designed around an [**AI‑assisted planning workflow**](./ai_workflow.md). 
+Before you begin implementing your hardware IP, you will use AI tools to help you explore design options, refine your architecture, and iteratively improve your specification. To make this process concrete and time‑bounded, the planning phase is divided into **two structured submissions**, each supported by automated AI feedback:
 
-- **Initial Plan:** A high‑level description of your IP, its purpose, and its architecture.
-- **Detailed Plan:** A deeper technical specification that includes module definitions, testbench strategy, and an incremental development plan.
+- **Initial Plan** — a high‑level description of your IP’s purpose, behavior, and overall architecture, written with the help of AI to clarify the problem and surface design choices.
+- **Detailed Plan** — a deeper technical specification that defines your module interfaces, configuration structure, testbench strategy, and incremental development path, again refined through AI‑guided iteration.
 
-Each submission will be evaluated through the [**LLM grader**](../aiautograder/), which provides structured feedback based on the rubric for that stage. You are strongly encouraged to work closely with AI tools while preparing these documents.
-
+Both submissions will be evaluated using the [LLM grader](../aiautograder/), which provides rubric‑aligned feedback to help you strengthen your design. As usual, you can submit to the LLM grader as many times as you want until you are satisfied with the design.  You are expected to use AI tools actively throughout this process—not as a replacement for your own reasoning, but as a structured partner in exploring alternatives, checking consistency, and improving clarity.
 ---
 
 ## GitHub Repository
