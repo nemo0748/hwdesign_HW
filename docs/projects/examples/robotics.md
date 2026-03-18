@@ -15,7 +15,7 @@ many policies can be simulated in parallel which may not be possible on lightwei
 
 The project is inspired by the amazing work on **robomorphic computing** in:
 
-Neuman, Sabrina M., Brian Plancher, Thomas Bourgeat, Thierry Tambe, Srinivas Devadas, and Vijay Janapa Reddi. "Robomorphic computing: a design methodology for domain-specific accelerators parameterized by robot morphology." In Proceedings of the 26th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, pp. 674-686. 2021.
+> Neuman, Sabrina M., Brian Plancher, Thomas Bourgeat, Thierry Tambe, Srinivas Devadas, and Vijay Janapa Reddi. "Robomorphic computing: a design methodology for domain-specific accelerators parameterized by robot morphology." In Proceedings of the 26th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, pp. 674-686. 2021.
 
 Here, we will do a very simple version.  We simulate a robotic system of the form:
 
@@ -54,3 +54,4 @@ The simulation can be performed as follows:
 - Trignometric computations are performed with a look up table
 - IP writes configuration trajectory using a streaming interface, writing the data as it performs the simulation
 - IP sends signals completion and collision information to PS via a response FIFO
+
