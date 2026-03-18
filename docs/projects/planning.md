@@ -16,6 +16,7 @@ Before you begin implementing your hardware IP, you will use AI tools to help yo
 - **Detailed Plan** — a deeper technical specification that defines your module interfaces, configuration structure, testbench strategy, and incremental development path, again refined through AI‑guided iteration.
 
 Both submissions will be evaluated using the [LLM grader](../aiautograder/), which provides rubric‑aligned feedback to help you strengthen your design. As usual, you can submit to the LLM grader as many times as you want until you are satisfied with the design.  You are expected to use AI tools actively throughout this process—not as a replacement for your own reasoning, but as a structured partner in exploring alternatives, checking consistency, and improving clarity.
+
 ---
 
 ## GitHub Repository
