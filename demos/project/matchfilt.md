@@ -1,3 +1,6 @@
+---
+nav_exclude: true
+---
 # Matched Filter Detector
 
 ## IP definition
