@@ -25,17 +25,3 @@ You can write it in latex if you like, but text is OK too.
 The LLM is pretty good at figuring out what you are trying to say.
 * **Grade button**:  Hit the grade button and in a few tens of seconds, you should see a **Feedback** and a longer **Explanation**.  Right now, it just gives **Correct** or **Incorrect**.  I may give part marks later.
 
-
-## Saving and Loading Your Work
-
-To **save** your results, beside the Unit dropdown, you will see a button **Save Results**.  For all problems in the unit that you have attempted to grade,
-clicking the button will save:
-- Your solution
-- The feedback from OpenAI
-- The full explanation
-- The grade result
-
-This will be downloaded to a JSON file to your Download folder.  You can store anywhere.
-
-Your answers are generally served on your browser.  But, if you want to recover them you can click the **Load Results** button and select the JSON file that you
-save above.
