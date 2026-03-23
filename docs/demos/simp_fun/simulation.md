@@ -1,6 +1,6 @@
 ---
 title: Simulation of the Module 
-parent: Basic Sequential Logic
+parent: Basic Sequential Logic and FSMs
 nav_order: 2
 has_children: false
 ---

@@ -1,6 +1,6 @@
 ---
 title: A Polynomial Example
-parent: Basic Sequential Logic
+parent: Basic Sequential Logic and FSMs
 nav_order: 3
 has_children: false
 ---

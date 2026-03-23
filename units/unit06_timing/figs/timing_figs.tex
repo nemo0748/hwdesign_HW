@@ -1,0 +1,427 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath, amssymb, bm, cite, epsfig, psfrag}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{pgf,tikz}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{siunitx}
+\usepackage{../../styles/course}
+
+
+\begin{document}
+
+\title{Introduction to Hardware Design\\
+Basic Digital Logic:  Figures and Code Snippets}
+\author{Profs. Sundeep Rangan, Siddharth Garg}
+\date{}
+
+\maketitle
+
+\subsection{ ReLU with a linear input}
+
+We consider implementing the ReLU function:
+  \[
+    y = \max\{ ax + b, 0\}
+  \]
+  where $x$, $a$, and $b$ are integer inputs.  This function arises commonly
+  in machine learning.
+  We first consider a purely combinational implementation of this function.
+  A possible SystemVerilog implementation is as follows:
+
+\begin{systemverilogcode}
+    module relu_lin (
+      input logic signed [31:0] x,
+      input logic signed [31:0] a,
+      input logic signed [31:0] b,
+      output logic signed [31:0] y
+    );
+      always_comb begin
+        logic signed [31:0] mult_out, add_out;
+        mult_out = x * a;
+        add_out = mult_out + b;
+        y = (add_out > 0) ? add_out : 0;
+      end
+    endmodule
+  \end{systemverilogcode}
+
+  When this module is synthesized, a potential block diagram is as shown in
+  Figure~\ref{fig:relu_comb}.
+
+  
+\begin{figure}
+\centering
+
+  \begin{tikzpicture}[node distance=1cm]
+
+    % x, a and multipliers
+    \node (x) {\texttt{x}};
+    \node [circop, right=1cm of x,fill=green!20] (mul) {$\times$};
+    \node [above of=mul, yshift=0.5cm] (a) {\texttt{a}};
+    \draw[->] (x) -- (mul);
+    \draw[->] (a) -- (mul);
+
+    % b and adder
+    \node[circop,right=2cm of mul,fill=green!20] (add) {$+$};
+    \node [above of=add, yshift=0.5cm] (b) {\texttt{b}};
+    \draw[->] (mul) -- node[midway,above] {\texttt{mult\_out}} (add);
+    \draw[->] (b) -- (add);
+
+    % max block
+    \node[draw, right=2cm of add,minimum height=1cm,fill=green!10] (max) {$\max\{u,0\}$};
+    \draw[->] (add) -- node[midway,above] {\texttt{add\_out}} (max);
+    \draw[->] (max) -- ++(1.5,0) node[right] {\texttt{y}};
+\end{tikzpicture}
+  \caption{Fully combinational block diagram for ReLU with a linear input.}
+  \label{fig:relu_comb}
+\end{figure}
+
+\subsection{Two input circuit}
+Next, we consider a simple two input circuit with the following SystemVerilog code:
+\begin{systemverilogcode}
+xsq = x * x;
+r = (x > 0) ? x : 0;
+y = xsq + r;
+\end{systemverilogcode}
+
+  
+\begin{figure}
+\centering
+
+  \begin{tikzpicture}[node distance=1cm]
+
+    % x, a and multipliers
+    \node (x) {\texttt{x}};
+    \node [circop, right=1cm of x,fill=green!20] (mul) {$\times$};
+
+    \coordinate[right=0.3cm of x] (xsplit);
+    \draw[->] (x) -- (xsplit);
+    \draw[->] (xsplit) -- (mul);   
+
+    % max block
+    \node[draw, right=1cm of x,minimum height=1cm,fill=green!10,yshift=-1.5cm] 
+      (max) {$\max\{x,0\}$};
+    \draw[->] (xsplit) |- (max.west);
+
+    % adder of max and xsq
+    \node[circop,right=2cm of mul,fill=green!20] (add) {$+$};
+    \draw[->] (mul) -- node[midway,above] {\texttt{xsq}} (add);
+    \draw[->] (max.east) -| node[midway,above,xshift=0.3cm] {\texttt{r}} (add.south);
+    \draw[->] (add) -- ++(1.5,0) node[right] {\texttt{y}};
+\end{tikzpicture}
+  \caption{Multi-path circuit.}
+  \label{fig:multi_path}
+\end{figure}
+
+\subsection{Block diagram for a multiplexer}
+\begin{systemverilogcode}
+// mux delay = 1 ns
+if (x > 0) begin  // delay = 0.5
+  z = func1(x);  // delay = 4
+end else begin 
+  z = func2(x);  // delay = 2
+end
+y = func3(z);    // delay = 1.5
+\end{systemverilogcode}
+
+\begin{figure}
+\centering
+
+  \begin{tikzpicture}[node distance=1cm]
+
+    % x, f1 and f2
+    \node (x) {\texttt{x}};
+    \coordinate[right=1cm of x] (xsplit);
+    \node[draw, right=1cm of xsplit,minimum height=1cm,fill=green!10,yshift=1cm] 
+      (f1) {$f_1(x)$};
+    \node[draw, right=1cm of xsplit,minimum height=1cm,fill=green!10,yshift=-1cm] 
+      (f2) {$f_2(x)$};  
+    
+    \draw[->] (x) -- (xsplit);
+    \draw[->] (xsplit) |- (f1);   
+    \draw[->] (xsplit) |- (f2);
+
+    % mux block
+    \node[draw, right=4cm of xsplit,minimum height=3cm,fill=green!10] (mux) {mux};
+    \draw[->] (f1.east) -- (mux.west |- f1.east);
+    \draw[->] (f2.east) -- (mux.west |- f2.east);
+
+    % Selection block
+    \node[draw, below=1cm of mux, minimum height=1cm, fill=green!10] (sel) {$x > 0$};
+    \draw[->] (xsplit) |- (sel.west);
+    \draw[->] (sel) -- (mux.south);
+
+    % f3 block
+    \node[draw, right=2cm of mux, minimum height=1cm, fill=green!10] (f3) {$f_3(z)$};
+    \draw[->] (mux) -- node[midway,above] {\texttt{z}} (f3);
+    \draw[->] (f3) -- ++(1.5,0) node[right] {\texttt{y}};
+
+\end{tikzpicture}
+\end{figure}
+
+
+
+\begin{figure}
+\centering
+
+  \begin{tikzpicture}[node distance=1cm]
+
+    % x, f1 and f2
+    \node (x) {\texttt{x}};
+    \coordinate[right=1cm of x] (xsplit);
+    \node[draw, right=1cm of xsplit,minimum height=1cm,fill=green!10,yshift=1cm] 
+      (f1) {$f_1(x)$};
+    \node[draw, right=1cm of xsplit,minimum height=1cm,fill=green!10,yshift=-1cm] 
+      (f2) {$f_2(x)$};  
+    
+    \draw[-,ultra thick, red] (x) -- (xsplit);
+    \draw[->,ultra thick, red] (xsplit) |- (f1);   
+    \draw[->] (xsplit) |- (f2);
+
+    % mux block
+    \node[draw, right=4cm of xsplit,minimum height=3cm,fill=green!10] (mux) {mux};
+    \draw[->,ultra thick, red] (f1.east) -- (mux.west |- f1.east);
+    \draw[->] (f2.east) -- (mux.west |- f2.east);
+
+    % Selection block
+    \node[draw, below=1cm of mux, minimum height=1cm, fill=green!10] (sel) {$x > 0$};
+    \draw[->] (xsplit) |- (sel.west);
+    \draw[->] (sel) -- (mux.south);
+
+    % f3 block
+    \node[draw, right=2cm of mux, minimum height=1cm, fill=green!10] (f3) {$f_3(z)$};
+    \draw[->,ultra thick, red] (mux) -- node[midway,above] {\texttt{z}} (f3);
+    \draw[->,ultra thick, red] (f3) -- ++(1.5,0) node[right] {\texttt{y}};
+
+\end{tikzpicture}
+\caption{Block diagram for a multiplexer highlight the critical path}
+\end{figure}
+
+\subsection{Register}
+
+Consider the following SystemVerilog code for a register:
+\begin{systemverilogcode}
+  always_comb begin
+    x_next = f(x);
+  end
+  always_ff @(posedge clk) begin
+    x <= x_next;
+  end
+\end{systemverilogcode}
+
+
+\begin{figure}
+\begin{tikzpicture}[>=stealth, font=\scriptsize, node distance=1.8cm]
+
+  % Register 
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        fill=blue!10] (reg) {};
+
+  % Input, clock and output
+
+  \node [left=1cm of reg.input] (D) {\texttt{D}};
+  \node [left=1cm of reg.clk] (clk) {\texttt{clk}};
+  \draw[->] (D) -- (reg.input);
+  \draw[->] (clk) -- (reg.clk);
+  \node [right=1cm of reg.output] (Q) {\texttt{Q}};
+  \draw[->] (reg.output) -- (Q);
+
+\end{tikzpicture}
+\caption{Basic register }
+\label{fig:reg_basic}
+\end{figure}
+
+
+
+\begin{figure}
+\begin{tikzpicture}[>=stealth, font=\scriptsize, node distance=1.8cm]
+
+  % Register 
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        fill=blue!10] (reg) {};
+
+  % Input, clock and output
+  \coordinate [left=1cm of reg.input] (xnext_in) {};
+  \node [left=1cm of reg.clk] (clk) {\texttt{clk}};
+  \draw[->] (xnext_in) -- (reg.input);
+  \draw[->] (clk) -- (reg.clk);
+
+  % Function block
+  \node [draw, right=1cm of reg, minimum height=1cm, fill=green!10] (f) {$f(x)$};
+  \draw[->] (reg.output) -- node[midway,above] {\texttt{x}} (f);
+  \draw[-] (f.east) -- ++(1,0) -- ++(0,1.5) -| 
+    node[midway,above,xshift=1cm] {\texttt{x\_next=f(x)}} (xnext_in);
+
+\end{tikzpicture}
+  \caption{Basic register block diagram of $x \leftarrow f(x)$}
+  \label{fig:sync_circuit}
+  
+\end{figure}
+
+\subsection{Two-Variable System}
+
+Consider two-variable system:
+\begin{systemverilogcode}
+  always_comb begin
+    z0 = func1(x0); 
+    z1 = func2(x1);   
+    x_next0 = func3(z0, z1);    
+    x_next1 = func4(z0, x1);
+  end
+  always_ff @(posedge clk) begin
+    x0 <= x_next0;
+    x1 <= x_next1;
+  end
+\end{systemverilogcode}
+
+Register-to-register paths are:
+\begin{systemverilogcode}
+x0 -> func1 -> func3 -> x0
+x0 -> func3 -> x1
+x1 -> func2 -> func3 -> x0
+x1 -> func4 -> x1
+\end{systemverilogcode}
+
+
+
+
+\begin{figure}
+\begin{tikzpicture}[>=stealth, font=\scriptsize, node distance=1.8cm]
+
+
+  % Initial variables
+  \node (x0) {$x_0$};
+  \node [below=2cm of x0] (x1) {$x_1$};
+
+  % Function blocks
+  \node [draw, right=1cm of x0, minimum height=1cm, fill=green!10] (f1) {$f_1(x_0)$};
+  \node [draw, below=0.2cm of f1, minimum height=1cm, fill=green!10] (f2) {$f_2(x_1)$};
+  \node [draw, right=1cm of f1, minimum height=1cm, fill=green!10] (f3) {$f_3(z_0,z_1)$};
+  \node [draw, right=2cm of x1, minimum height=1cm, fill=green!10] (f4) {$f_4(z_0,x_1)$};
+  \draw[->] (x0) -- (f1);
+  \draw[->] (x1) -- ++(0.5,0) |- (f2.west);
+  \draw[->] (f1) -- node[midway,above] {$z_0$} (f3);
+  \draw[->] (f2) -| node[midway,above,xshift=-0.5cm] {$z_1$} (f3.south);
+  \draw[->] (f1.east) -- ++(0.5,0) -- ++(0,-0.5) -| (f4.north);;
+
+  % Register 
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        right=6cm of x0,  fill=blue!10] (x0reg) {};
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        right=6cm of x1, fill=blue!10] (x1reg) {};
+  \draw[->] (x1) -- (f4);
+  \draw[->] (f3) -- node[midway,above] {\texttt{x\_next0}} (x0reg.input);
+  \draw[->] (f4) -- node[midway,above] {\texttt{x\_next1}} (x1reg.input);
+  \draw[->] (x0reg.output) -- ++(0.5,0) node [right] {$x_0'$};
+  \draw[->] (x1reg.output) -- ++(0.5,0) node [right] {$x_1'$};
+\end{tikzpicture}
+  \caption{Simple two variable system}
+  \label{fig:twovar}
+  
+\end{figure}
+
+
+
+\begin{figure}
+\begin{tikzpicture}[>=stealth, font=\scriptsize, node distance=1.8cm]
+
+
+  % Initial variables
+  \node (x0) {$x_0$};
+  \node [below=2cm of x0] (x1) {$x_1$};
+
+  % Function blocks
+  \node [draw, right=1cm of x0, minimum height=1cm, fill=green!10] (f1) {$f_1(x_0)$};
+  \node [draw, below=0.2cm of f1, minimum height=1cm, fill=green!10] (f2) {$f_2(x_1)$};
+  \node [draw, right=1cm of f1, minimum height=1cm, fill=green!10] (f3) {$f_3(z_0,z_1)$};
+  \node [draw, right=2cm of x1, minimum height=1cm, fill=green!10] (f4) {$f_4(z_0,x_1)$};
+  \draw[->] (x0) -- (f1);
+  \draw[->,ultra thick, red] (x1) -- ++(0.5,0) |- (f2.west);
+  \draw[->] (f1) -- node[midway,above] {$z_0$} (f3);
+  \draw[->,ultra thick, red] (f2) -| node[midway,above,xshift=-0.5cm] {$z_1$} (f3.south);
+  \draw[->] (f1.east) -- ++(0.5,0) -- ++(0,-0.5) -| (f4.north);;
+
+  % Register 
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        right=6cm of x0,  fill=blue!10] (x0reg) {};
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        right=6cm of x1, fill=blue!10] (x1reg) {};
+  \draw[->] (x1) -- (f4);
+  \draw[->,ultra thick, red] (f3) -- node[midway,above] {\texttt{x\_next0}} (x0reg.input);
+  \draw[->] (f4) -- node[midway,above] {\texttt{x\_next1}} (x1reg.input);
+  \draw[->,ultra thick, red] (x0reg.output) -- ++(0.5,0) node [right] {$x_0'$};
+  \draw[->] (x1reg.output) -- ++(0.5,0) node [right] {$x_1'$};
+\end{tikzpicture}
+  \caption{Critical path in two variable system}
+  \label{fig:twovar_critical}
+  
+\end{figure}
+
+
+
+
+\begin{figure}
+\begin{tikzpicture}[>=stealth, font=\scriptsize, node distance=1.8cm]
+
+  % Register 
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        fill=blue!10] (reg) {};
+
+  % Input, clock and output
+  \coordinate [left=1cm of reg.input] (xnext_in) {};
+  \node [left=1cm of reg.clk] (clk) {\texttt{clk}};
+  \draw[->] (xnext_in) -- (reg.input);
+  \draw[->] (clk) -- (reg.clk);
+
+  % Function block
+  \node [draw, right=1cm of reg, minimum height=1cm, fill=green!10] (f) {$f(x)$};
+  \draw[->] (reg.output) -- node[midway,above] {\texttt{x}} (f);
+  \draw[-] (f.east) -- ++(1,0) -- ++(0,1.5) -| 
+    node[midway,above,xshift=1cm] {\texttt{x\_next=f(x)}} (xnext_in);
+
+\end{tikzpicture}
+  \caption{Basic register block diagram of $x \leftarrow f(x)$}
+  \label{fig:sync_circuit}
+  
+\end{figure}
+
+\subsection{Minimum Hold Time}
+
+Consider the following SystemVerilog code:
+\begin{systemverilogcode}
+always_ff @(posedge clk) begin
+  x0 <= x;
+  x1 <= x0;
+end
+\end{systemverilogcode}
+
+This is a simple delay line:
+\begin{figure}
+\begin{tikzpicture}[>=stealth, font=\scriptsize, node distance=1.8cm]
+
+  % Initial variables
+  \node (x) {$x$};
+
+  % Register blocks
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        right=1cm of x, fill=blue!10] (reg0) {};
+  \node[shape=register, draw, minimum width=1cm, minimum height=2cm,
+        right=1cm of reg0, fill=blue!10] (reg1) {};
+
+  % Connections
+  \draw[->] (x) -- (reg0.input);
+  \draw[->] (reg0.output) -- node[midway,above] {\texttt{x0}} (reg1.input);
+  \draw[->] (reg1.output) -- ++(0.5,0) node [right] {\texttt{x1}};
+
+\end{tikzpicture}
+  \caption{Simple delay line}
+  \label{fig:delay_line}
+  
+\end{figure}
+\end{document}
