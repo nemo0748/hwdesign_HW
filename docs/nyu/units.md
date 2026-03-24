@@ -38,9 +38,11 @@ A tentative set of units is as follows.  I've only added a few units so far, but
     * Lecture:  [[PDF]](https://github.com/sdrangan/hwdesign/tree/main/units/unit05_fifo/fifo.pdf) [[pptx]](https://github.com/sdrangan/hwdesign/tree/main/units/unit04_fifo/fifo.pptx) 
     * [Vitis HLS Demo: AXI4-Streaming FIFO interface](../demos/fifoif/)
     * [Problems](../../units/unit05_fifo/prob/fifo.html)
-* Unit 6:  Timing Diagrams and Critical Path Analysis
+* Unit 6:  Timing and Critical Path Analysis
+    * Lecture:  [[PDF]](https://github.com/sdrangan/hwdesign/tree/main/units/unit05_fifo/fifo.pdf) [[pptx]](https://github.com/sdrangan/hwdesign/tree/main/units/unit04_fifo/fifo.pptx) 
+    * [Problems](../../units/unit06_timing/prob/timing.html)
 * Unit 7:  Pipelining and Loop Optimization
     * [Vitis HLS Demo: A pipelined vector multiplier](../demos/loopopt)
-* Unit 8:  Systolic Arrays
-* Unit 9:  Dataflow and Shared Memory architectures
+* Unit 8:  Dataflow and Shared Memory architectures
+* Unit 9:  Systolic Arrays
 * Unit 10:  Multi-Threaded Control

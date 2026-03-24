@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Timing and Critical Paths Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 5px;
+        }
+        .question {
+            margin-bottom: 40px;
+        }
+        pre code {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.95em;
+            display: block;
+        }
+    </style>
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"]]
+      }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Timing and Critical Paths Questions</h1>
+    <div class="question">
+        <h2>Question 1. Propagation delay</h2>
+
+        <p>A signal \(x\) changes according to the following table:</p>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>Time [ns]</th><td>10</td><td>20</td><td>30</td></tr>
+            <tr><th>Value</th><td>0</td><td>4</td><td>2</td></tr>
+        </table>
+        <p>So, \(x=0\) starting at 10 ns, \(x=4\) starting at 20 ns, and \(x=2\) starting at 30 ns. The signal is passed through a circuit whose stable value is \(y = 2x + 1\) with a propagation delay of 3 ns.  List the  times at which  \(y\) changes and the corresponding values.  Ensure to mark the period of unknown values (i.e., \(y=?\) appropriately.</p>
+        
+    </div>
+    <div class="question">
+        <h2>Question 2. Series timing</h2>
+
+        <p> Consider the following SystemVerilog combinational code:</p>
+        <pre><code>xsq = x*x;
+y = a*xsq;
+z = y + b;
+</code></pre>
+        <p>Assume each multiplication has a maximum propagation delay of 3 ns and the addition has a maximum propagation delay of 2 ns. 
+        Suppose that <code>x</code> is stable for a long period before time 0, and then changes immediately to <code>x=4</code> at time 10 ns, remaining stable thereafter. The variables <code>a=3</code> and <code>b=6</code> are constants.  Answer the following:
+        </p>
+        <ol type="a">
+        <li> What are the stable values for <code>xsq</code>, <code>y</code>, and <code>z</code> before and after the change? </li>
+        <li> After the switch at \(t=10\) ns, at what point do each of the signals first become stable, and when do they reach their final stable values? </li>
+        </ol>
+        
+    </div>
+    <div class="question">
+        <h2>Question 3. Multi-path timing</h2>
+
+        <p> Consider the following SystemVerilog combinational code:</p>
+        <pre><code>z1 = a*x;
+z2 = x+b;
+y = max(z1, z2);
+</code></pre>
+        <p>Suppose that the input \(x\) changes with the following times and values:</p>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>Time [ns]</th><td>0</td><td>10</td><td>12</td></tr>
+            <tr><th>Value</th><td>0</td><td>?</td><td>4</td></tr>
+        </table>
+        <p>Specifically, the input \(x\) is stable at 0 for a long period before time 0, then changes to an unknown value (?) at 10 ns, and then becomes stable again at 4 starting at 12 ns. The variables \(a=3\) and \(b=6\) are constants. Assume that the multiplication has a maximum propagation delay of 3 ns, the addition has a maximum propagation delay of 2 ns, and the max operation has a maximum propagation delay of 1 ns. Answer the following:</p>
+        <ol type="a">
+        <li> What are the stable values for <code>z1</code>, <code>z2</code>, and <code>y</code> before t=10 ns? </li>
+        <li> What are the eventual stable values after t=12 ns after all propagation delays? </li>
+        <li> What times after t=10 ns do the signals <code>z1</code>, <code>z2</code>, and <code>y</code> first become unknown (?) and then stable again?</li>
+        </ol>
+        
+    </div>
+    <div class="question">
+        <h2>Question 4. Timing with multiplexer</h2>
+
+        <p> Consider the following SystemVerilog combinational code
+        with two inputs, \(x_1\) and \(x_2\):</p>
+        <pre><code>if (x1 > 2) begin  // Delay to evaluate condition = 0.5 ns
+    z1 = func1(x1);  // propagation delay of 4 ns
+end else begin
+    z1 = func2(x1);  // propagation delay of 2 ns
+end
+z2 = func3(x2);   // propagation delay of 3 ns
+y = func4(z1, z2);  // propagation delay of 1.5 ns
+</code></pre>
+        <p>The if condition is implemented with a multiplexer, meaning both functions \(f_1\) and \(f_2\) are evaluated in parallel, but only one of their outputs is selected based on the value of \(x_1\).  The multiplexer has a propagation delay of 0.8 ns.  Suppose that before time 0, all signals are stable, and then at time 0, both \(x_1\) and \(x_2\) change value simultaneously.  At what point do the following signals become stable (i.e., no longer unknown):</p>
+        <ol type="a">
+        <li> \(z_1\)</li>
+        <li> \(z_2\)</li>
+        <li> \(y\)</li>
+        </ol>
+        
+    </div>
+    <div class="question">
+        <h2>Question 5. Critical path</h2>
+
+        <p> Consider the following SystemVerilog code:</p>
+        <pre><code>always_comb begin
+    x1_next = func1(x1); // delay = 2.3 ns
+
+    // mux delay = 0.4 ns
+    if (x1 > 2) begin  // delay = 0.5 ns
+        x2_next = func2(x1);  // delay = 3.7 ns, depends on x1
+    end else begin
+        // delay = 2.1 ns, depends on x1_next, not x1
+        x2_next = func3(x1_next);  
+    end
+end
+always_ff @(posedge clk) begin
+    x1 <= x1_next;
+    x2 <= x2_next;
+end
+</code></pre>
+        <p>The if condition is implemented with a multiplexer with the condition and two branches evaluated in parallel.  The multiplexer adds an additional delay of 0.4 ns.</p>
+        <ol type="a">
+        <li> Determine the critical path delay for the combinational logic that produces <code>x1_next</code> and <code>x2_next</code>.</li>
+        <li> What is the maximum clock frequency for this design assuming clock-to-Q delay is 0.2ns and setup time is 0.1ns?</li>
+        </ol>
+        
+    </div>
+    <div class="question">
+        <h2>Question 6. Two cycle datapath</h2>
+
+        <p> Consider the following SystemVerilog code with an input <code>x</code>:</p>
+        <pre><code>always_comb begin
+    xsq = xreg*xreg;  
+    axsq = a*xsq;  
+    bx = b*xreg;  
+    if (xreg > 10) begin 
+        y = axsq + bx;  
+    end else begin
+        y = bx;  
+    end
+end
+always_ff @(posedge clk) begin
+    xreg <= x;
+end
+</code></pre>
+        <p>Assume the following delays:</p>
+        <ul>
+            <li>Multiplication: 2 ns</li>
+            <li>Addition: 1 ns</li>
+            <li>Comparison <code>xreg > 10</code>: 0.5 ns</li>
+            <li>Register update: 1 ns</li>
+            <li>Multiplexer (for if statement): 0.4 ns</li>
+        </ul>
+        <p>Answer the following:</p>
+        <ol type="a">
+        <li> The current code computes <code>y</code> in a single cylce.  What is the propagation time after the rising edge of the clock for the signal <code>y</code> to become stable (i.e., no longer unknown)?</li>
+        <li> Rewrite the code registering <code>xsq</code>, <code>bx</code>, and <code>gt10=xreg&gt;10</code> to create a two cycle datapath for computing <code>y</code>.</li>
+        <li> What is the critical path delay for the two cycle datapath?</li>
+        </ol>
+        
+    </div>
+</body>
+</html>
