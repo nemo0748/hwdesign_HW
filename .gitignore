@@ -165,3 +165,14 @@ test_vectors/*
 
 # Ignore extra directory
 extra/
+
+# Powerpoint temporary files
+~$*.pptx
+
+# Pipeline project
+**/pipeline/hls_component/*
+**/pipeline/include/*
+**/pipeline/vitis_run_out.txt
+**/pipeline/poly_proj/*
+**/stream_old/*
+
