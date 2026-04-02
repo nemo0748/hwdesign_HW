@@ -3,8 +3,8 @@ requires = ["setuptools>=61", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "xilinxutils"
-description = "Xilinx helper utilities"
+name = "pysilicon"
+description = "Python tools for hardware design"
 readme = {file = "readme.md", content-type = "text/markdown"}
 requires-python = ">=3.9"
 license = {text = "BSD-3-Clause"}
@@ -27,18 +27,17 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["xilinxutils*"]
+include = ["pysilicon*"]
 
 [tool.setuptools_scm]
 fallback_version = "0.1.0"
-write_to = "xilinxutils/_version.py"
+write_to = "pysilicon/_version.py"
 
 [project.scripts]
-xsim_vcd = "xilinxutils.scripts.xsim_vcd:main"
-collect_overlay = "xilinxutils.scripts.collect_overlay:main"
-sv_sim = "xilinxutils.scripts.sv_sim:main"
-sv_synth = "xilinxutils.scripts.sv_build:run_synth"
-sv_impl  = "xilinxutils.scripts.sv_build:run_impl"
-check_latex_soln = "xilinxutils.scripts.check_latex_soln:main"
-autograde_llm_latex = "xilinxutils.scripts.autograde_llm_latex:entrypoint"
-build_lab_autograder = "xilinxutils.scripts.build_lab_autograder:main"
+xsim_vcd = "pysilicon.scripts.xsim_vcd:main"
+collect_overlay = "pysilicon.scripts.collect_overlay:main"
+sv_sim = "pysilicon.scripts.sv_sim:main"
+sv_synth = "pysilicon.scripts.sv_build:run_synth"
+sv_impl  = "pysilicon.scripts.sv_build:run_impl"
+autograde_llm_latex = "pysilicon.scripts.autograde_llm_latex:entrypoint"
+build_lab_autograder = "pysilicon.scripts.build_lab_autograder:main"
