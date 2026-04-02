@@ -176,3 +176,11 @@ extra/
 **/pipeline/poly_proj/*
 **/stream_old/*
 
+# Pipeline project
+**/stream/hls_component/*
+**/stream/include/*
+**/stream/vitis_run_out.txt
+**/stream/poly_proj/*
+**/stream_old/*
+
+
