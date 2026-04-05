@@ -27,9 +27,16 @@ The IP we will build will follow the folliwng command-response FIFO protocol:
 - As the data streams in, the IP computes the output data array `y`.
 - When complete the IP sends a `PolyRespFtr` message with an indication of the number of samples and any error code.
 
-----
+## Implementation
 
-Go to [defining the data structures](./datastructs.md)
 
-## Message Definitions
+An implementation of the polynomial kernel and testbench can be found in the  [notebook](https://github.com/sdrangan/hwdesign/blob/main/demos/stream/poly_demo.ipynb).  The implementation uses tthe [Pysilicon package](https://sdrangan.github.io/pysilicon/docs/guide/schema/).  
+The notebook shows:
 
+- How to construct python PySilicon **data schemas** representing the messages
+- **Auto-generate** HLS C++ header files corresponding to the messages
+- Write Vitis HLS C++ code using the **serialization** and **deserialization** functions in the headers to transfer data between the kernel and IP using the messages
+- Test for synchronization errors
+- Run the C simulation and RTL simulation
+- Extract a **VCD** file from the RTL simulation
+- View the AXI4 timing bursts.

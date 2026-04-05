@@ -1,8 +1,8 @@
-#include "poly.hpp"
+#include <ap_axi_sdata.h>
+#include <ap_int.h>
+#include <hls_stream.h>
 
-#ifndef UNROLL_FACTOR
-#define UNROLL_FACTOR 2
-#endif
+#include "poly.hpp"
 
 
 static float eval_poly_horner(const float coeff[4], float x) {
@@ -14,63 +14,99 @@ static float eval_poly_horner(const float coeff[4], float x) {
     return y;
 }
 
+
+static void flush_input_to_tlast(hls::stream<axis_word_t>& in_stream) {
+    bool done = false;
+    while (!done) {
+#pragma HLS PIPELINE II=1
+        axis_word_t axis_word = in_stream.read();
+        done = axis_word.last;
+    }
+}
+
 void poly(hls::stream<axis_word_t>& in_stream, hls::stream<axis_word_t>& out_stream) {
 #pragma HLS INTERFACE axis port=in_stream
 #pragma HLS INTERFACE axis port=out_stream
 #pragma HLS INTERFACE ap_ctrl_none port=return
 
-    // Read the command header from the input stream
+    // Read the command header from the input stream and track whether TLAST arrives
+    // at the expected boundary for the header payload.
     PolyCmdHdr cmd_hdr;
-    cmd_hdr.read_axi4_stream<WORD_BW>(in_stream);
+    streamutils::tlast_status cmd_hdr_tlast = streamutils::tlast_status::no_tlast;
+    cmd_hdr.read_axi4_stream<WORD_BW>(in_stream, cmd_hdr_tlast);
 
-    // Write the response header to the output stream with the same transaction ID as the command header
-    // Mark the header word as the last beat for this single-word write.
+    // Return a response header immediately so the test bench can correlate the output
+    // stream with the transaction ID from the command.
     PolyRespHdr resp_hdr;
     resp_hdr.tx_id = cmd_hdr.tx_id;
     resp_hdr.write_axi4_stream<WORD_BW>(out_stream, true);
 
-    // We will read the input samples in chunks of the packing factor (number of samples that fit in one AXI word), 
-    // and write the output samples in the same way. This is more efficient than reading/writing one sample at a time,
-    // since it takes advantage of the full AXI bandwidth and allows for better pipelining. 
-    // The arrays x_lane and y_lane hold one chunk of input and output samples, respectively.
+    // Allocate one packed lane of sample storage.  The packing factor depends on the
+    // AXI stream word width, so a 64-bit stream processes two float32 samples per word.
     static const int pf = float32_array_utils::pf<WORD_BW>();
     float x_lane[pf];
     float y_lane[pf];
 #pragma HLS ARRAY_PARTITION variable=x_lane complete dim=1
 #pragma HLS ARRAY_PARTITION variable=y_lane complete dim=1
 
-    // Process the input samples one packing factor at a time. For each chunk, we read the input samples from the stream, compute the output samples using the polynomial evaluation, and write the output samples to the stream. We also need to keep track of how many samples are left to process (nrem) in order to know when to assert tlast on the output stream.
-    int nrem = cmd_hdr.nsamp;
-    for (int i = 0; i < cmd_hdr.nsamp; i += pf) {
+    // Read the sample-data burst, evaluate the polynomial lane-by-lane, and stream the
+    // results back out.  The command header and sample payload are now separate TLAST-
+    // terminated bursts on the input stream.
+    int nsamp_read = 0;
+    streamutils::tlast_status samp_in_tlast = streamutils::tlast_status::no_tlast;
+    bool read_samples = (cmd_hdr_tlast == streamutils::tlast_status::tlast_at_end) && (cmd_hdr.nsamp > 0);
+    for (int i = 0; i < cmd_hdr.nsamp && read_samples; i += pf) {
+        const int nrem = cmd_hdr.nsamp - i;
+        const int lane_count = (nrem < pf) ? nrem : pf;
+        streamutils::tlast_status lane_tlast = streamutils::tlast_status::no_tlast;
+        float32_array_utils::read_axi4_stream_elem<WORD_BW>(in_stream, x_lane, lane_tlast, nrem);
 
-        // Read a chunk of input samples from the stream. The utility function read_axi4_stream_elem reads 
-        // up to pf samples from the stream and stores them in x_lane, and returns the number of samples read 
-        // (which may be less than pf for the last chunk).
-        float32_array_utils::read_axi4_stream_elem<WORD_BW>(in_stream, x_lane, nrem);
-
-        // Compute the output samples for this chunk using the polynomial evaluation. We only compute for the valid
-        // samples in this chunk (up to nrem).  The unroll directive allows us to compute all samples in the chunk in parallel, 
-        // which can improve performance.
         for (int k = 0; k < pf; ++k) {
 #pragma HLS UNROLL
-            if (k < nrem) {
+            if (k < lane_count) {
                 y_lane[k] = eval_poly_horner(cmd_hdr.coeffs.data, x_lane[k]);
             }
         }
 
-        // Write the data
-        bool tlast = (nrem <= pf);
-        float32_array_utils::write_axi4_stream_elem<WORD_BW>(out_stream, y_lane, tlast, nrem);
+        const bool out_tlast = (nrem <= pf);
+        float32_array_utils::write_axi4_stream_elem<WORD_BW>(out_stream, y_lane, out_tlast, nrem);
 
-        nrem -= pf;
+        nsamp_read += lane_count;
+        if (lane_tlast == streamutils::tlast_status::tlast_at_end) {
+            samp_in_tlast = out_tlast ? streamutils::tlast_status::tlast_at_end : streamutils::tlast_status::tlast_early;
+            read_samples = false;
+        }
     }
 
-    // Write the response footer to the output stream. The response footer includes the number of samples read and an 
-    //error code. In this example, we set the error code to NO_ERROR, but in a real implementation, you would set it based on 
-    // any errors that occurred during processing (e.g., invalid command header, etc.).
+    // Summarize how many samples were consumed and classify any stream-boundary errors
+    // after the pipelined loop has completed.
     PolyRespFtr resp_ftr;
-    resp_ftr.nsamp_read = cmd_hdr.nsamp;
+    resp_ftr.nsamp_read = nsamp_read;
     resp_ftr.error = PolyError::NO_ERROR;
+    bool need_flush = false;
+    if (cmd_hdr_tlast == streamutils::tlast_status::tlast_early) {
+        resp_ftr.error = PolyError::TLAST_EARLY_CMD_HDR;
+    } else if (cmd_hdr_tlast == streamutils::tlast_status::no_tlast) {
+        resp_ftr.error = PolyError::NO_TLAST_CMD_HDR;
+        need_flush = true;
+    } else if (cmd_hdr.nsamp == 0) {
+        resp_ftr.nsamp_read = 0;
+    } else if (samp_in_tlast == streamutils::tlast_status::tlast_early) {
+        resp_ftr.error = PolyError::TLAST_EARLY_SAMP_IN;
+    } else if (samp_in_tlast == streamutils::tlast_status::no_tlast) {
+        resp_ftr.error = PolyError::NO_TLAST_SAMP_IN;
+        need_flush = true;
+    } else if (nsamp_read != cmd_hdr.nsamp) {
+        resp_ftr.error = PolyError::WRONG_NSAMP;
+    }
+
+    // If TLAST has not yet been seen for a malformed input message, drain words until the
+    // next TLAST boundary so the following transaction starts aligned on the input stream.
+    if (need_flush) {
+        flush_input_to_tlast(in_stream);
+    }
+
+    // Terminate the response footer with TLAST so the test bench can detect the end of
+    // the final response message independently of the payload stream.
     resp_ftr.write_axi4_stream<WORD_BW>(out_stream, true);
 }
-
