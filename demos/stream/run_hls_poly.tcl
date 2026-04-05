@@ -1,16 +1,14 @@
 open_project -reset poly_proj
 set_top poly
-add_files poly.cpp
-add_files -tb poly_tb.cpp
+add_files poly.cpp 
+add_files -tb poly_tb.cpp 
 
 open_solution -reset "solution1"
 set_part {xc7z020clg484-1}
 create_clock -period 10
 
-set script_dir [file dirname [file normalize [info script]]]
-set data_dir [file join $script_dir "data"]
 
-if {[catch {csim_design -argv "$data_dir"} res]} {
+if {[catch {csim_design } res]} {
     puts "FAIL:  poly C-Simulation failed."
     puts $res
     exit 1
@@ -18,11 +16,26 @@ if {[catch {csim_design -argv "$data_dir"} res]} {
 
 puts "SUCCESS:  poly C-Simulation passed."
 
-if {[catch {csynth_design} res]} {
+# ------------------------------------------------------------
+# C Synthesis.  Comment out if you want to run C simulation only.
+# ------------------------------------------------------------
+if {[catch {csynth_design } res]} {
     puts "FAIL:  poly C-Synthesis failed."
     puts $res
     exit 1
 }
 
-puts "SUCCESS: poly C-Synthesis passed."
-exit 0
+puts "SUCCESS:  poly C-Synthesis passed."
+
+
+# ------------------------------------------------------------
+# RTL Co-Simulation
+# Pass argument "rtl" to testbench via cosim.argv
+# Comment out if you want to run C synthesis only.
+# ------------------------------------------------------------
+if {[catch {cosim_design -trace_level all} res]} {
+    puts "FAIL:  poly RTL Co-Simulation failed."
+    puts $res
+    exit 1
+}
+puts "SUCCESS:  poly RTL Co-Simulation passed."

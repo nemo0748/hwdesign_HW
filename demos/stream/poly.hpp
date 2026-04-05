@@ -14,9 +14,8 @@
 #include "include/poly_cmd_hdr.h"
 #include "include/poly_resp_ftr.h"
 #include "include/poly_resp_hdr.h"
-#include "include/samp_data_in.h"
-#include "include/samp_data_out.h"
 #include "include/streamutils_hls.h"
+#include "include/float32_array_utils.h"
 
 
 static const int MAX_NSAMP = 128;

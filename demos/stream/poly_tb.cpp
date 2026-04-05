@@ -19,19 +19,18 @@ int main(int argc, char** argv) {
     memcpy(cmd_hdr.coeffs.data, coeffs.data(), 4 * sizeof(float));
 
     // Put in some input data uniformly spaced between 0 and 1
-    SampDataIn samp_in;
+    float x[nsamp];
     for (int i = 0; i < nsamp; ++i) {
-        samp_in.data[i] = (float) i / nsamp;
+        x[i] = (float) i / nsamp;
     }
 
     // Compute the expecteed output using the same polynomial evaluation as the DUT
-    SampDataOut samp_out_exp;
+    float y_exp[nsamp];
     for (int i = 0; i < nsamp; ++i) {
-        float x = samp_in.data[i];
-        samp_out_exp.data[i] = coeffs[0]
-                            + coeffs[1] * x
-                            + coeffs[2] * x * x
-                            + coeffs[3] * x * x * x;
+        float x_val = x[i];
+        y_exp[i] = coeffs[0] + coeffs[1] * x_val
+                + coeffs[2] * x_val * x_val
+                + coeffs[3] * x_val * x_val * x_val;
     }
 
     // Create the streams to the DUT
@@ -39,8 +38,10 @@ int main(int argc, char** argv) {
     hls::stream<axis_word_t> out_stream;
 
     // Write the command header and input samples to the DUT input stream
-    cmd_hdr.write_axi4_stream<WORD_BW>(in_stream, false);
-    samp_in.write_axi4_stream<WORD_BW>(in_stream, true, nsamp);
+    cmd_hdr.write_axi4_stream<WORD_BW>(in_stream, true);
+
+    // Write the data samples
+    float32_array_utils::write_axi4_stream<WORD_BW>(in_stream, x, true, nsamp);
 
     // Run the DUT that will write to the output stream
     poly(in_stream, out_stream);
@@ -49,8 +50,10 @@ int main(int argc, char** argv) {
     PolyRespHdr resp_hdr;
     resp_hdr.read_axi4_stream<WORD_BW>(out_stream);
 
-    SampDataOut samp_out;
-    samp_out.read_axi4_stream<WORD_BW>(out_stream, nsamp);
+    // Read the output samples
+
+    float y_dut[nsamp];
+    float32_array_utils::read_axi4_stream<WORD_BW>(out_stream, y_dut, nsamp);
 
     PolyRespFtr resp_ftr;
     resp_ftr.read_axi4_stream<WORD_BW>(out_stream);
@@ -58,7 +61,7 @@ int main(int argc, char** argv) {
     // Compare the DUT sample out with the expected output
     float mae = 0.;
     for (int i = 0; i < nsamp; ++i) {
-        mae +=  std::fabs(samp_out.data[i] - samp_out_exp.data[i]);
+        mae +=  std::fabs(y_dut[i] - y_exp[i]);
     }
     mae /= nsamp;
     std::cout << "Mean Absolute Error (MAE): " << mae << std::endl;
