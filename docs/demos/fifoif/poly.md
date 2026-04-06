@@ -7,8 +7,6 @@ has_children: false
 
 # Polynomial Example
 
-## Files
-
 We will illustrate the command-response FIFO design mehodology with an example of a simple polynomial accelerator.  The accelerator computes a polynomial function of `x[k]`:
 
 ```python

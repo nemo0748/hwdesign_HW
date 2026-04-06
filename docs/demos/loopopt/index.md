@@ -11,6 +11,7 @@ Hardware acceleration can provide particularly significant gains when repeating 
 A conventional single unit processor can only perform one task in each clock cycle.  Custom hardware, in contrast, can replicate many units to operate in parallel.  The challenge is how to coordinate mutliple units and ensure they are fully utilized.  In this unit, we will illustrate these concepts with a simple vector multiplication.   
 
 In going through this unit, you will learn to:
+
 - **Identify and synthesize loop constructs** in Vitis HLS for hardware implementation
 - **Analyze loop performance** using *initiation interval (II)*, *latency*, and *resource utilization* from synthesis reports
 - **Apply loop pipelining directives** to reduce initiation interval and improve throughput
@@ -18,6 +19,6 @@ In going through this unit, you will learn to:
 
 ---
 
-Go to [Building the vector multiplier example](./buildex.md).
+Go to [Polynomial example](./poly.md).
 
 

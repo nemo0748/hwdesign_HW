@@ -16,11 +16,11 @@ In this unit, we introduce a widely used and efficient design pattern for IPs: t
 
 By working through this unit, you will learn to:
 
-* Design **command** and **response** data structures for a simple IP
-* Implement **FIFO** interfaces for the command and response data with **AXI4-Stream** protocol
-* Create VITIS-synthesizable **serialization** and **deserialization** methods for general data structures
-* Add **transaction IDs** and **error controls** for command–response pairs
-* Visualize the AXI4-Stream protocols in timing diagrams
+- Design **command** and **response** data structures for a simple IP
+- Implement **FIFO** interfaces for the command and response data with **AXI4-Stream** protocol
+- Create VITIS-synthesizable **serialization** and **deserialization** methods for general data structures
+- Add **transaction IDs** and **error controls** for command–response pairs
+- Visualize the AXI4-Stream protocols in timing diagrams
 
 
  

@@ -103,7 +103,7 @@ void poly(hls::stream<axis_word_t>& in_stream, hls::stream<axis_word_t>& out_str
     // If TLAST has not yet been seen for a malformed input message, drain words until the
     // next TLAST boundary so the following transaction starts aligned on the input stream.
     if (need_flush) {
-        flush_input_to_tlast(in_stream);
+        streamutils::flush_axi4_stream_to_tlast<WORD_BW>(in_stream);
     }
 
     // Terminate the response footer with TLAST so the test bench can detect the end of

@@ -170,13 +170,11 @@ extra/
 ~$*.pptx
 
 # Pipeline project
-**/pipeline/hls_component/*
+**/pipeline/poly_uf*
 **/pipeline/include/*
 **/pipeline/vitis_run_out.txt
-**/pipeline/poly_proj/*
-**/stream_old/*
 
-# Pipeline project
+# Stream project
 **/stream/hls_component/*
 **/stream/include/*
 **/stream/vitis_run_out.txt
