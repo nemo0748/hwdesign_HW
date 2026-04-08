@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Loop Optimization and Pipelining Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 5px;
+        }
+        .question {
+            margin-bottom: 40px;
+        }
+        pre code {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.95em;
+            display: block;
+        }
+    </style>
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"]]
+      }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Loop Optimization and Pipelining Questions</h1>
+    <div class="question">
+        <h2>Question 1. Two Cycle Design</h2>
+
+        <p>Consider the following SystemVerilog code that computes an output <code>y</code> based on inputs <code>x1</code> and <code>x2</code> in a single cycle:</p>
+        <pre><code>always_ff @(posedge clk) begin
+    xreg1 <= x1;
+    xreg2 <= x2;
+end
+always_comb begin
+   z1 = f1(xreg1, xreg2);  // delay = 3.8 ns
+   z2 = f2(xreg1, xreg2);  // delay = 2.1 ns
+   z3 = f3(xreg1, z2);     // delay = 1.5 ns
+   y = f4(z1, z3);         // delay = 1.2 ns
+end
+</code></pre>
+        <ol type="a">
+            <li>What is the critical path delay of this single cycle design?</li>
+            <li>Rewrite the code inserting pipeline registers on <code>z1</code>, <code>z2</code>, <code>xreg1</code> to achieve a two-cycle design.</li>
+            <li>What is the critical path delay of the two-cycle design?</li>
+        </ol>
+        
+    </div>
+    <div class="question">
+        <h2>Question 2. Pipeline cycle values</h2>
+
+            <p>Consider the following SystemVerilog pipeline:</p>
+            <pre><code>always_ff @(posedge clk) begin
+    x_s0 <= x;
+    z1_s1 <= 10*x_s0;
+    if (z1_s1 > 100) begin
+        z2_s2 <= 150 - (z1_s1>>>1);
+    end else begin
+        z2_s2 <= z1_s1;;
+    end
+end
+always_comb begin
+    y = (3*z2_s2>>>2);
+end
+</code></pre>
+            <p>which has input <code>x</code> and output <code>y</code>.  Suppose the inputs <code>x</code> 
+            on cycles 0, 1, and 2 are 
+            \[
+            3, 6, 12
+            \]
+            and are unknown (?) on later cycles.
+            Write the values of the signals <code>x_s0</code>, <code>z1_s1</code>, <code>z2_s2</code>, and <code>y</code> for cycles 0 through 5. Assume that all registers are initialized to ? at cycle 0 (unknown).
+            
+    </div>
+    <div class="question">
+        <h2>Question 3. Pipelined maximum</h2>
+
+            <p>Given an input <code>x_0</code>, we wish to create a hardware module that computes the maximum</p>
+            \[
+                max2 = \text{max}(x_0, f(x_0), f(f(x_0))).
+            \]
+            <p>We are given a SystemVerilog combinational function that implements <code>f</code></p>
+            <pre><code>z = f(x);
+</code></pre>
+            Write a pipelined SystemVerilog code for this module with II=1.  On the first stage, only register the input -- do not do any further computation. You will need to then insert registers between stages, but each stage can have at most one instance of the function <code>f</code>.
+            The final output should be combinational.
+            
+    </div>
+    <div class="question">
+        <h2>Question 4. Loop carry dependency</h2>
+
+        <p>Consider the following two loops. Each loop contains a loop-carried dependency that affects the minimum possible initiation interval (II) when pipelined in Vitis HLS.</p>
+
+        <h3>Loop A</h3>
+        <pre><code>sum = 0;
+ind = 0;
+for (int i = 0; i < 100; i++) {
+    sum += x[ind];
+    ind = ind_next[ind];
+}
+</code></pre>
+
+        <h3>Loop B</h3>
+        <pre><code>sum = 0;
+ind = 0;
+for (int i = 0; i < 100; i++) {
+    sum += x[ind];
+    if (sum > 0)
+        ind = ind_next_pos[ind];
+    else
+        ind = ind_next_neg[ind];
+}
+</code></pre>
+
+        <p>
+        Assume the following operation latencies:
+        </p>
+        <ul>
+        <li>A memory read takes <strong>1 cycle</strong>.</li>
+        <li>An addition takes <strong>1 cycle</strong>.</li>
+        <li>A comparison and mux (the <code>if</code> selection) take <strong>1 cycle</strong>.</li>
+        </ul>
+
+        <p>For each loop, one way to compute the minimum initiation interval (II) is to follow these steps:</p>
+
+        <ol>
+        <li><strong>List the operations</strong> performed in one iteration of the loop.  For example, a step could be <code> xi = x[ind]</code> corresponding to loading the values from the array or <code> sum += xi</code> corresponding to the addition operation.</li>
+        <li><strong>Assign the operations to pipeline stages</strong>, assuming each operation takes one cycle.  
+            Write your answer in the form:<br/>
+            <code>Stage 0: ...<br/>Stage 1: ...<br/>Stage 2: ...</code>.  For example, in Loop A, one possible assignment is:<br/>
+            <code>Stage 0: xi = x[ind];, Stage 1: sum += xi;, ...</code>
+        </li>
+        <li><strong>Identify any loop-carried dependencies.</strong>.  For example, Stage 0 of iteration \(i\) depends on the value of ind from iteration \(i-1\).</li>
+        <li><strong>Compute the minimum II</strong> as the number of cycles required before the next iteration can begin.  For example, if Stage 0 of iteration \(i\) depends on Stage 2 of iteration \(i-1\), the minimum II is 3 cycles.</li>
+        </ol>
+
+        <p>Using this procedure, determine the minimum II for:</p>
+        <ol type="a">
+        <li>Loop A</li>
+        <li>Loop B</li>
+        </ol>
+        
+    </div>
+    <div class="question">
+        <h2>Question 5. Wide band memory</h2>
+
+        <p>Consider the following loop, where <code>x</code> is stored in a single-port memory (only one read per cycle is allowed):</p>
+
+        <pre><code>int x[3*n], d[n];
+for (int i = 0; i < n; i++) {
+    d[i] = x[3*i]   * x[3*i] +
+        x[3*i+1] * x[3*i+1] +
+        x[3*i+2] * x[3*i+2];
+}
+</code></pre>
+
+        <p>
+        Each loop iteration requires three reads from <code>x</code>: indices <code>3*i</code>, <code>3*i+1</code>, and <code>3*i+2</code>.  
+        Assume:
+        </p>
+        <ul>
+        <li>Each memory read takes <strong>1 cycle</strong>.</li>
+        <li>The arithmetic operations are fully pipelined and do not limit II.</li>
+        <li><strong>Only one read</strong> from <code>x</code> may occur per cycle.</li>
+        </ul>
+
+        <p><strong>(a)</strong> What is the minimum possible initiation interval (II) for this loop?</p>
+
+        <p><strong>(b)</strong> Now suppose the data is stored in a packed format using a 96‑bit word:</p>
+
+        <pre><code>ap_uint<96> xpacked[n];
+</code></pre>
+
+        <p>
+        Each 96‑bit element contains the three 32‑bit values previously stored at <code>x[3*i]</code>, <code>x[3*i+1]</code>, and <code>x[3*i+2]</code>.  
+        Rewrite the loop using <code>xpacked</code> and determine the new minimum II, assuming the same single-port memory.  You can use the syntax <code>p.range(31, 0)</code> to extract the lower 32 bits of a 96‑bit variable <code>p</code>, and similar code to extract the other 32-bit variables.
+        </p>
+        
+    </div>
+    <div class="question">
+        <h2>Question 6. Moving average</h2>
+
+        <p>Consider the following 4-tap moving average computation:</p>
+
+        <pre><code>for (i = 0; i < ny; i++) {
+    yi = 0;
+    for (j = 0; j < 4; j++) {
+        yi += x[i+j];
+    }
+    y[i] = (yi >> 2);
+}
+</code></pre>
+
+        <p>Assume that <code>x</code> is stored in a <strong>single-port memory</strong>, so only one read from <code>x</code> may occur per cycle.</p>
+
+        <p><strong>(a)</strong> What is the minimum possible initiation interval (II) of the <em>outer</em> loop?</p>
+
+        <p><strong>(b)</strong> Suppose the inner loop is fully unrolled using <code>#pragma HLS UNROLL</code>.  
+        Does this change the minimum II? Explain why or why not.</p>
+
+        <p><strong>(c)</strong> Now consider using a delay line to reduce the number of memory reads per iteration:</p>
+
+        <pre><code>int xdly[4];
+#pragma HLS ARRAY_PARTITION variable=xdly complete
+</code></pre>
+
+        <p>
+        Rewrite the loop using the delay line so that the outer loop can achieve  
+        <strong>II = 1</strong>.  
+        Your rewritten loop should read only <strong>one</strong> new value from <code>x</code> per iteration.
+        </p>
+        
+    </div>
+    <div class="question">
+        <h2>Question 7. Row-column additions</h2>
+
+        <p>Consider the following declaration:</p>
+
+        <pre><code>float X[512][4];
+#pragma HLS ARRAY_PARTITION variable=X dim=2 factor=4 cyclic
+</code></pre>
+
+        <p>
+        This pragma partitions the second dimension (<code>dim=2</code>) into 4 separate memory banks.  
+        Thus, each <strong>column</strong> of <code>X</code> is stored in a different bank.  
+        This means that values <code>X[i0][0]</code>, <code>X[i1][1]</code>, <code>X[i2][2]</code>, and <code>X[i3][3]</code>  
+        may all be read in the <strong>same clock cycle</strong>, because they come from different banks.
+        </p>
+        <ol type="a">
+        <li>Write a pipelined loop that computes the sum of each row. Your loop should run in approximately 512 cycles + pipeline latency.</li>
+        <li>Write a pipelined loop that computes the sum of each column. Your loop should also run in approximately 512 cycles + pipeline latency. Hint: you will need four independent accumulators.</li>
+        </ol>
+
+        
+    </div>
+    <div class="question">
+        <h2>Question 8. Memory with unrolling</h2>
+
+        <p>A Vitis HLS kernel contains a loop that may be unrolled for performance:</p>
+
+        <pre><code>float x[1024], y[1024];
+
+for (int i = 0; i < 1024; i++) {
+#pragma HLS UNROLL factor=UF
+    y[i] = g(x[i]);
+}
+</code></pre>
+
+        <p>
+        To support unrolling by a factor <code>UF</code>, the arrays must be partitioned into
+        <code>UF</code> independent memory banks. Assume Vitis maps each bank into separate BRAM
+        blocks with the following constraints:
+        </p>
+
+        <ul>
+        <li>Each BRAM block is <strong>18 kbits</strong>.</li>
+        <li>Each array element is <strong>32 bits</strong> (4 bytes).</li>
+        <li>Different banks must use <strong>different BRAM blocks</strong>, and arrays
+            <code>x</code> and <code>y</code> must not share BRAM blocks.</li>
+        </ul>
+
+        <p>
+        How many BRAM18 blocks are required to store the arrays <code>x</code> and <code>y</code>
+        for each of the following unroll factors:
+        </p>
+
+        <ol type="a">
+        <li><code>UF = 1</code></li>
+        <li><code>UF = 2</code></li>
+        <li><code>UF = 4</code></li>
+        </ol>
+        
+    </div>
+</body>
+</html>

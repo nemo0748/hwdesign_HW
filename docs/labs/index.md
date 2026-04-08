@@ -19,6 +19,8 @@ semester.
 * [Unit 4:  Root solver for a nonlinear function](./rootsolve/)
    * Implement a simple iterative root solver accelerator in Vitis HLS and optionally
    connect to a processor.
+* [Unit 7:  Pipelined line intersection accelerator](./intersect/)
+   * Build a simple intersection detector that can be used in physical and robotics simulations
 
 
 
