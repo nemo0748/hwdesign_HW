@@ -1,6 +1,7 @@
 open_project -reset poly_proj
 set_top poly
 add_files poly.cpp 
+add_files include/streamutils.cpp 
 add_files -tb poly_tb.cpp 
 
 open_solution -reset "solution1"

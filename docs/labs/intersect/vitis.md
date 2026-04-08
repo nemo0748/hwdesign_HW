@@ -26,6 +26,12 @@ Once you have completed the Vitis kernel, you can simulate it with:
 vitis-run --mode hls --tcl run_hls.tcl
 ```
 
+If you are using the [NYU server](../../support/nyuremote/), you must use the older command line syntax
+
+```bash
+vitis_hls -f run_hls.tcl
+```
+
 If you prefer, you can also run the C simulation from the GUI.  This command will run the C simulation and C synthesis.
 The testbench will:
 
