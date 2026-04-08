@@ -69,6 +69,11 @@ class DataSchema(ABC):
         """Return consistent indentation for generated C++ code."""
         return "    " * level
 
+    @staticmethod
+    def _scope_local_lines(lines: list[str]) -> list[str]:
+        """Wrap generated statements in a local C++ scope to avoid name collisions."""
+        return ["    {"] + [f"    {line}" for line in lines] + ["    }"]
+
     @classmethod
     def to_uint_expr(cls, value_expr: str) -> str:
         """Return a C++ expression that packs a value into unsigned bits."""
@@ -2942,7 +2947,7 @@ class DataArray(DataSchema):
                     lines.append("        out_idx++;")
                 lines.append("    }")
                 next_iword = start_iword + cls.nwords_per_inst(word_bw) if cls.static else iword0
-                return lines, 0, next_iword
+                return cls._scope_local_lines(lines), 0, next_iword
 
             lines.insert(decl_end, "    int elem_idx = 0;")
             out_idx_init = start_iword if dst_type == "array" else 0
@@ -2985,7 +2990,7 @@ class DataArray(DataSchema):
                 lines.append(f"        streamutils::write_axi4_word<{word_bw}>({target}, w, false);")
             lines.append("    }")
             next_iword = start_iword + cls.nwords_per_inst(word_bw) if cls.static else iword0
-            return lines, 0, next_iword
+            return cls._scope_local_lines(lines), 0, next_iword
 
         if pf == 1:
             out_idx_init = start_iword if dst_type == "array" else 0
@@ -3006,7 +3011,7 @@ class DataArray(DataSchema):
             for d in range(ndims):
                 lines.append(f"{'    ' * (ndims - d)}}}")
             next_iword = start_iword + cls.nwords_per_inst(word_bw) if cls.static else iword0
-            return lines, 0, next_iword
+            return cls._scope_local_lines(lines), 0, next_iword
 
         if issubclass(elem_type, DataField):
             raise ValueError(
@@ -3030,7 +3035,7 @@ class DataArray(DataSchema):
         for d in range(ndims):
             lines.append(f"{'    ' * (ndims - d)}}}")
         next_iword = start_iword + cls.nwords_per_inst(word_bw) if cls.static else iword0
-        return lines, 0, next_iword
+        return cls._scope_local_lines(lines), 0, next_iword
 
     @classmethod
     def _gen_read_recursive(
@@ -3117,7 +3122,7 @@ class DataArray(DataSchema):
                     lines.append("        return;")
                     lines.append("    }")
                 next_iword = start_iword + cls.nwords_per_inst(word_bw) if cls.static else iword0
-                return lines, 0, next_iword
+                return cls._scope_local_lines(lines), 0, next_iword
 
             lines.insert(len(n_eff_names) + (2 if src_type != "array" else 1), "    int elem_idx = 0;")
             if src_type == "axi4_stream":
@@ -3165,7 +3170,7 @@ class DataArray(DataSchema):
             lines.append("        in_idx++;")
             lines.append("    }")
             next_iword = start_iword + cls.nwords_per_inst(word_bw) if cls.static else iword0
-            return lines, 0, next_iword
+            return cls._scope_local_lines(lines), 0, next_iword
 
         if pf == 1:
             if src_type == "axi4_stream":
@@ -3204,7 +3209,7 @@ class DataArray(DataSchema):
                 lines.append("        return;")
                 lines.append("    }")
             next_iword = start_iword + cls.nwords_per_inst(word_bw) if cls.static else iword0
-            return lines, 0, next_iword
+            return cls._scope_local_lines(lines), 0, next_iword
 
         if issubclass(elem_type, DataField):
             raise ValueError(
@@ -3244,7 +3249,7 @@ class DataArray(DataSchema):
         for d in range(ndims):
             lines.append(f"{'    ' * (ndims - d)}}}")
         next_iword = start_iword + cls.nwords_per_inst(word_bw) if cls.static else iword0
-        return lines, 0, next_iword
+        return cls._scope_local_lines(lines), 0, next_iword
 
     @classmethod
     def _gen_dump_json_recursive(
