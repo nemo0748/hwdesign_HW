@@ -36,7 +36,6 @@ hls/
 _build/
 _build.hw/
 _build.sw/
-build/
 .vscode/
 *.db
 *.pb
@@ -80,7 +79,6 @@ __pycache__/
 # Distribution artifacts
 *.egg-info/
 dist/
-build/
 
 # IDE/editor settings
 .vscode/
