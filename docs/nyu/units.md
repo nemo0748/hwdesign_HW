@@ -39,12 +39,15 @@ A tentative set of units is as follows.  I've only added a few units so far, but
     * [Vitis HLS Demo: AXI4-Streaming FIFO interface](../demos/fifoif/)
     * [Problems](../../units/unit05_fifo/prob/fifo.html)
 * Unit 6:  Timing and Critical Path Analysis
-    * Lecture:  [[PDF]](https://github.com/sdrangan/hwdesign/tree/main/units/unit05_fifo/fifo.pdf) [[pptx]](https://github.com/sdrangan/hwdesign/tree/main/units/unit04_fifo/fifo.pptx) 
+    * Lecture:  [[PDF]](https://github.com/sdrangan/hwdesign/tree/main/units/unit06_timing/timing.pdf) [[pptx]](https://github.com/sdrangan/hwdesign/tree/main/units/unit06_timing/timing.pptx) 
     * [Problems](../../units/unit06_timing/prob/timing.html)
 * Unit 7:  Pipelining and Loop Optimization
+    * Lecture:  [[PDF]](https://github.com/sdrangan/hwdesign/tree/main/units/unit07_loopopt/loopopt.pdf) [[pptx]](https://github.com/sdrangan/hwdesign/tree/main/units/unit_loopopt/loopopt.pptx)
     * [Vitis HLS Demo: A pipelined polynomial accelerator](../demos/loopopt)
     * [Problems](../../units/unit07_loopopt/prob/loopopt.html)
     * Lab:  [Building a pipelined line intersection accelartor](../labs/intersect/)
-* Unit 8:  Dataflow and Shared Memory architectures
+* Unit 8:  Shared Memory architectures
+    * Lecture:  [[PDF]](https://github.com/sdrangan/hwdesign/tree/main/units/unit08_sharedmem/sharedmem.pdf) [[pptx]](https://github.com/sdrangan/hwdesign/tree/main/units/unit_lunit08_sharedmem/sharedmem.pptx)
+    * [Histogram accelerator](https://github.com/sdrangan/hwdesign/tree/main/demos/histogram)
 * Unit 9:  Systolic Arrays
 * Unit 10:  Multi-Threaded Control
