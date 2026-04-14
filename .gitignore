@@ -179,4 +179,12 @@ extra/
 **/stream/poly_proj/*
 **/stream_old/*
 
+# Histogram project
+**/histogram/pysilicon_hist_proj/
+**/histogram/include/
+**/histogram/logs/
+**/histogram/vcd/
+**/histogram/data/
+
+
 

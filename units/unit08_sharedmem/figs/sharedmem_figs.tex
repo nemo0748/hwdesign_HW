@@ -1,0 +1,72 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath, amssymb, bm, cite, epsfig, psfrag}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{pgf,tikz}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{siunitx}
+\usepackage{../../styles/course}
+
+
+\begin{document}
+
+\title{Introduction to Hardware Design\\
+Shared Memory:  Figures and Code Snippets}
+\author{Profs. Sundeep Rangan, Siddharth Garg}
+\date{}
+
+\maketitle
+\subsection{AXI-MM queue}
+
+\begin{pythoncode}
+class PolyCmdHdr(DataList):
+    elements = {
+        "read_ind": {
+            "schema": IntField.specialize(bitwidth=16, signed=False),
+            "description": "Read pointer",
+        },
+        "write_ind": {
+            "schema": IntField.specialize(bitwidth=16, signed=False),
+            "description": "Write pointer",
+        },
+        "queue_len": {
+            "schema": IntField.specialize(bitwidth=16, signed=False),
+            "description": "Maximum queue length in number of entries"
+        }
+    }
+\end{pythoncode}
+
+\begin{ccode}
+void kernel(uint64_t queue_base,
+            volatile uint32_t *doorbell,
+            ap_uint<mem_dwidth> *mem) {
+#pragma HLS INTERFACE s_axilite port=queue_base
+#pragma HLS INTERFACE s_axilite port=doorbell
+#pragma HLS INTERFACE m_axi     port=mem
+#pragma HLS INTERFACE ap_ctrl_none port=return
+    while (1) {
+        // Poll doorbell
+        if (*doorbell != 0) {
+
+            // Clear doorbell
+            *doorbell = 0;
+
+            // Read queue entries from memory
+            // Process all outstanding commands
+            // Write completions back to memory
+        }
+    }
+}
+
+\end{ccode}
+\end{document}
+
+  
+
