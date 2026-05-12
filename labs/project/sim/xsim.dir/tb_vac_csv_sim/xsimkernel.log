@@ -1,7 +1,7 @@
-Running: xsim.dir/tb_vac_csv_sim/xsimk -runall -simmode gui -wdb tb_vac_csv_sim.wdb -simrunnum 0 -socket 54695
+Running: xsim.dir/tb_vac_csv_sim/xsimk -runall -simmode gui -wdb tb_vac_csv_sim.wdb -simrunnum 0 -socket 41529
 Design successfully loaded
 Design Loading Memory Usage: 43700 KB (Peak: 43820 KB)
 Design Loading CPU Usage: 10 ms
 Simulation completed
 Simulation Memory Usage: 138508 KB (Peak: 182968 KB)
-Simulation CPU Usage: 30 ms
+Simulation CPU Usage: 20 ms

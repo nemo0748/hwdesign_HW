@@ -3,8 +3,8 @@
 # SW Build 4029153 on Fri Oct 13 20:13:54 MDT 2023
 # IP Build 4028589 on Sat Oct 14 00:45:43 MDT 2023
 # SharedData Build 4025554 on Tue Oct 10 17:18:54 MDT 2023
-# Start of session at: Tue May 12 18:43:58 2026
-# Process ID: 106030
+# Start of session at: Tue May 12 18:57:11 2026
+# Process ID: 172788
 # Current directory: /home/ng2525/hwdesign_HW/labs/project/sim
 # Command line: xsim -log logs/xsim.log -mode tcl -source {xsim.dir/tb_vac_csv_sim/xsim_script.tcl}
 # Log file: /home/ng2525/hwdesign_HW/labs/project/sim/logs/xsim.log
@@ -17,7 +17,7 @@ Time resolution is 1 ps
 run -all
 WARNING: file test_vectors.csv could not be opened
 Reading vectors from: ../test_vectors.csv
-Done! Processed 23 vectors. Results saved to results.csv
-$finish called at time : 6075 ns : File "/home/ng2525/hwdesign_HW/labs/project/tb_vac_csv.sv" Line 290
+Done! Processed 30 vectors. Results saved to results.csv
+$finish called at time : 7895 ns : File "/home/ng2525/hwdesign_HW/labs/project/tb_vac_csv.sv" Line 290
 exit
-INFO: [Common 17-206] Exiting xsim at Tue May 12 18:44:01 2026...
+INFO: [Common 17-206] Exiting xsim at Tue May 12 18:57:14 2026...
