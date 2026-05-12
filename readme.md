@@ -17,13 +17,16 @@ Log into the EDA server:
 ssh <netid>@ecs02.poly.edu
 ```
 
+Clone this repository so it appears in VSCode.
+Enter the hwdesign_HW folder on VSCode. Execute the following commands in the terminal.
+
 Then install `uv` into your home directory:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Enter the hwdesign_HW folder on VSCode. Execute the following commands in the terminal.
+
 ```bash
 setenv PATH "$HOME/.local/bin:$PATH"
 unsetenv PYTHONPATH
