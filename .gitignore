@@ -5,7 +5,7 @@
 *.str
 *.cache/
 *.runs/
-*.sim/
+#*.sim/
 *.hw/
 *.ip_user_files/
 *.webtalk/
