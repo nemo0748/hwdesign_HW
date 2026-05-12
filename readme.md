@@ -88,15 +88,16 @@ uv pip install -e .
 
 # 4. Running VAC
 
-Once the environment is activated, enter the Project folder. 
-Use the following command. 
+Once the environment is activated, enter the Project folder from the hwdesign_HW folder. 
+Use the following command to do so. 
 ```bash
-cd hwdesign_HW/project
+cd labs/project
 ```
 
-Run the project with the following command. 
+Once in the project folder, run the following command to execute the project testbenches and code. 
 
 ```bash
 uv run sv_sim --source vac.sv --tb tb_vac_csv.sv
 ```
 
+The logs, output, and results.csv files will be placed in the sim folder. 
