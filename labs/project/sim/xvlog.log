@@ -1,0 +1,8 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "/home/ng2525/hwdesign_HW/labs/project/vac.sv" into library work
+INFO: [VRFC 10-311] analyzing module axi_lite_regbank
+INFO: [VRFC 10-311] analyzing module power_engine
+INFO: [VRFC 10-311] analyzing module weighted_accumulator
+INFO: [VRFC 10-311] analyzing module dual_path_formatter
+INFO: [VRFC 10-311] analyzing module vac
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "/home/ng2525/hwdesign_HW/labs/project/tb_vac_csv.sv" into library work
+INFO: [VRFC 10-311] analyzing module tb_vac_csv

@@ -1,0 +1,20 @@
+Vivado Simulator v2023.2
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+Running: /eda/xilinx/Vivado/2023.2/bin/unwrapped/lnx64.o/xelab tb_vac_csv -s tb_vac_csv_sim -debug typical -log logs/xelab.log 
+Multi-threading is on. Using 126 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+WARNING: [VRFC 10-5021] port 's_axil_araddr' is not connected on this instance [/home/ng2525/hwdesign_HW/labs/project/tb_vac_csv.sv:28]
+WARNING: [VRFC 10-3645] port 's_axil_arready' remains unconnected for this instance [/home/ng2525/hwdesign_HW/labs/project/tb_vac_csv.sv:28]
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.axi_lite_regbank
+Compiling module work.power_engine
+Compiling module work.weighted_accumulator
+Compiling module work.dual_path_formatter
+Compiling module work.vac
+Compiling module work.tb_vac_csv
+Built simulation snapshot tb_vac_csv_sim
