@@ -23,12 +23,6 @@ Then install `uv` into your home directory:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-This command installs `uv` into a local binary in the directory:
-
-```bash
-~/.local/bin
-```
-
 Enter the hwdesign_HW folder on VSCode. Execute the following commands in the terminal.
 ```bash
 setenv PATH "$HOME/.local/bin:$PATH"
