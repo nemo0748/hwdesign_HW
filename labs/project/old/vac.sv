@@ -10,17 +10,7 @@
 
 /*****************************************************************************
  * Module 1 – AXI4-Lite Control Register Bank
- *
- * FIX: The original two-FF, split-handshake implementation could lose writes
- * when AWVALID and WVALID were asserted on the same cycle and de-asserted
- * after a single handshake observation (as the provided TB does). The previous
- * design required AWVALID and WVALID to be observed in two separate cycles
- * because the write commit guarded on a *registered* version of AW being
- * latched. This led to writes never committing on the cycle WVALID was
- * already being deasserted, so coefficients were written into the *previous*
- * transaction's address (off-by-one). This rewrite accepts AW+W atomically
- * in a single cycle when both VALIDs are high — a perfectly standard
- * AXI4-Lite slave behavior.
+
  *****************************************************************************/
 module axi_lite_regbank #(
     parameter int DATA_W = 32,
@@ -186,12 +176,6 @@ endmodule
 /*****************************************************************************
  * Module 3 – Weighted Accumulator
  *
- * FIX: The original code computed x^3 as (x * x2[31:0]) and then term_A as
- * (A * x3[31:0]). That double-truncation discarded the high bits of x^3
- * before the saturation stage could see them, so for inputs like x=1500
- * where x^3 = 3.375e9 the saturated output was wrong. We now compute
- * x^3 at full 64-bit precision and form term_A with the full product
- * truncated only at the final 64-bit sum boundary.
  *****************************************************************************/
 module weighted_accumulator (
     input  logic clk,
