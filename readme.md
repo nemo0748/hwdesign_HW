@@ -20,13 +20,13 @@ ssh <netid>@ecs02.poly.edu
 Clone this repository so it appears in VSCode.
 Enter the hwdesign_HW folder on VSCode. Execute the following commands in the terminal.
 
-Then install `uv` into your home directory:
+Install `uv` into your home directory:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-
+Set the paths for accessing the files. 
 ```bash
 setenv PATH "$HOME/.local/bin:$PATH"
 unsetenv PYTHONPATH
