@@ -1,21 +1,11 @@
-# Project Setup
+# VAC Project Setup
 To be able to run the code, the environment must be set up. The following steps explain how to setup this entire project in a NYU server. 
 
 # Using Python on NYU EDA Servers
 
 The NYU EDA servers provide a system Python installation, but `pip` is not available and you do not have permission to install system-wide packages.
 
-To work around this, students should use `uv`, a modern, fast, user-level Python package manager that installs entirely in your home directory. This suggestion was provided by the student Ashesh Kaji.
-
-`uv` is a drop-in replacement for:
-
-- `pip`
-- `virtualenv`
-- `pipx`
-- `pip-tools`
-- `poetry` (for basic workflows)
-
-It requires no `sudo` access and works perfectly on the NYU servers.
+To work around this, students should use `uv`, a modern, fast, user-level Python package manager that installs entirely in your home directory.
 
 ---
 
@@ -39,58 +29,22 @@ This command installs `uv` into a local binary in the directory:
 ~/.local/bin
 ```
 
-We need to add this path to the system. Linux has different shells, and the commands differ slightly depending on the shell type.
-
-Below are the commands for the `tcsh` shell type.
-
-You can verify your shell type with:
-
-```bash
-echo $SHELL
-```
-
-If you are not using `tcsh`, the commands below will not work.
-
-Now, assuming you are using `tcsh`, open the file:
-
-```bash
-~/.tcshrc
-```
-
-Add the following lines at the end of the file:
-
+Enter the hwdesign_HW folder on VSCode. Execute the following commands in the terminal.
 ```bash
 setenv PATH "$HOME/.local/bin:$PATH"
 unsetenv PYTHONPATH
 ```
 
-You can edit the file using any Linux editor such as `vi`.
-
-Now rerun the shell initialization:
-
-```bash
-source ./.tcshrc
-```
-
-Note that you do not need to perform this command for subsequent shells. This command will be run automatically.
-
-You can verify installation with:
+Verify installation with:
 
 ```bash
 uv --version
 ```
-
 ---
 
 # 2. Create a Virtual Environment
 
-Navigate to the directory where you cloned the `hwdesign` repository. Generally, this is:
-
-```bash
-~/hwdesign
-```
-
-Inside that project directory, run:
+Run:
 
 ```bash
 uv venv
@@ -121,7 +75,7 @@ deactivate
 
 # 3. Install Your Project or Dependencies
 
-From the `hwdesign` directory, while the virtual environment is activated, install the packages with:
+From the `hwdesign_HW` directory, while the virtual environment is activated, install the packages with:
 
 ```bash
 uv pip install -r requirements.txt
@@ -135,18 +89,17 @@ uv pip install -e .
 
 ---
 
-# 4. Running Python
+# 4. Running VAC
 
-Once the environment is activated:
-
+Once the environment is activated, enter the Project folder. 
+Use the following command. 
 ```bash
-uv run python your_script.py
+cd hwdesign_HW/project
 ```
 
-You can also run scripts like `sv_sim` with:
+Run the project with the following command. 
 
 ```bash
-uv run sv_sim --source [source files] --tb [tb_files]
+uv run sv_sim --source vac.sv --tb tb_vac_csv.sv
 ```
 
-Everything runs inside your private environment, not the system Python.
