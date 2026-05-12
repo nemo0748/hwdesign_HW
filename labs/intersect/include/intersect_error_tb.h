@@ -1,0 +1,6 @@
+#ifndef INCLUDE_INTERSECT_ERROR_TB_H
+#define INCLUDE_INTERSECT_ERROR_TB_H
+
+#include "intersect_error.h"
+
+#endif // INCLUDE_INTERSECT_ERROR_TB_H

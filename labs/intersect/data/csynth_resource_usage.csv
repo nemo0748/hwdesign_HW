@@ -1,0 +1,13 @@
+,BRAM_18K,DSP,FF,LUT,URAM
+read_axi4_stream_impl_Pipeline_VITIS_LOOP_606_1,0,0,102,90,0
+read_axi4_stream_impl_Pipeline_VITIS_LOOP_633_2,0,0,6,90,0
+read_axi4_stream_impl_Pipeline_VITIS_LOOP_660_3,0,0,102,90,0
+read_axi4_stream_impl,0,0,687,541,0
+line_inter_Pipeline_setup_loop,0,0,196,75,0
+line_inter_Pipeline_VITIS_LOOP_323_1,0,0,172,463,0
+line_inter_Pipeline_compute_loop,0,57,5887,9204,0
+line_inter_Pipeline_VITIS_LOOP_380_1,0,0,16,115,0
+line_inter_Pipeline_VITIS_LOOP_76_1,0,0,2,20,0
+line_inter,8,57,7463,10976,0
+Total,8,57,7463,10976,0
+Available,280,220,106400,53200,0
