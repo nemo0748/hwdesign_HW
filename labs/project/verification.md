@@ -100,6 +100,5 @@ The saturation results confirm that the full-precision accumulation fix in `weig
 | Peak simulation memory | 182,968 KB (~179 MB) | `xsimkernel.log` |
 | Steady-state simulation memory | 138,508 KB (~135 MB) | `xsimkernel.log` |
 
-> Latency and throughput figures above are **simulation-domain** metrics. They confirm the testbench's cycle-level timing model is consistent with the RTL, but do not represent post-synthesis or post-implementation performance on physical FPGA hardware.
 
 ---
