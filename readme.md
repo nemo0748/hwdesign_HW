@@ -2,7 +2,7 @@
 Select the /labs/project/ folder which will have all the project files.
 
 More information on parts of repo:
-* **FINAL_PRESENTATION VIDEO** is within the `labs/project/` as an MP4 file: link to youtube video here: https://youtu.be/KrIPXa4ebX4
+* **FINAL_PRESENTATION VIDEO** is within the `labs/project/` as an MP4 file, but I also provided a youtube video for ease of access. Link to youtube video here: https://youtu.be/KrIPXa4ebX4
 * The top-level `README.md` in `hwdesign_HW/` explains project setup, environment configuration, and how to run the project using VS Code.
 * The detailed hardware project documentation is located in `labs/project/README.md`. This file contains the VAC IP design description, architecture, interfaces, module organization, and implementation details.
 * Verification evidence and results analysis are located in `labs/project/verification.md`, including simulation outputs, verification methodology, and performance evaluation.
