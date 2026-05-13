@@ -1,4 +1,4 @@
-# VAC Project Location
+# VAC Essential Project Location Information
 Select the labs/project/ folder which will have all the project files. The instructions below also provide a quick way to enter it quickly by using the provided cd command.
 
 More information on parts of repo:
