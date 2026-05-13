@@ -8,6 +8,8 @@ Select the labs/project/ folder which will have all the project files. The instr
 
 All implementation, documentation, verification artifacts, and simulation outputs are contained within the same repository.
 
+Teammates: I did not have a team this time. I worked by myself and completed the project to the best of my ability.
+
 # VAC Project Setup
 To be able to run the code, the environment must be set up. The following steps explain how to setup this entire project in a NYU server. 
 
