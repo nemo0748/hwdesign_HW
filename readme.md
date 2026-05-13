@@ -1,4 +1,4 @@
-# VAC Project LOCATION
+# VAC Project Location
 Select the labs/project/ folder which will have all the project files. The instructions below also provide a quick way to enter it quickly by using the provided cd command.
 * The top-level `README.md` in `hwdesign_HW/` explains project setup, environment configuration, and how to run the project using VS Code.
 * The detailed hardware project documentation is located in `labs/project/README.md`. This file contains the VAC IP design description, architecture, interfaces, module organization, and implementation details.
