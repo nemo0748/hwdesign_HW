@@ -1,5 +1,12 @@
 # VAC Project LOCATION
 Select the labs/project/ folder which will have all the project files. The instructions below also provide a quick way to enter it quickly by using the provided cd command.
+* The top-level `README.md` in `hwdesign_HW/` explains project setup, environment configuration, and how to run the project using VS Code.
+* The detailed hardware project documentation is located in `labs/project/README.md`. This file contains the VAC IP design description, architecture, interfaces, module organization, and implementation details.
+* Verification evidence and results analysis are located in `labs/project/verification.md`, including simulation outputs, verification methodology, and performance evaluation.
+* The directory `labs/project/sim/` contains the simulation-generated files and artifacts produced during verification.
+* RTL source files and testbench files are also contained within the `labs/project/` directory structure.
+
+All implementation, documentation, verification artifacts, and simulation outputs are contained within the same repository.
 
 # VAC Project Setup
 To be able to run the code, the environment must be set up. The following steps explain how to setup this entire project in a NYU server. 
