@@ -1,5 +1,5 @@
 # VAC Essential Project Location Information
-Select the labs/project/ folder which will have all the project files. The instructions below also provide a quick way to enter it quickly by using the provided cd command.
+Select the labs/project/ folder which will have all the project files.
 
 More information on parts of repo:
 * **FINAL_PRESENTATION VIDEO** is within the `labs/project/` as an MP4 file.
