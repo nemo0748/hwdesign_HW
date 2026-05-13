@@ -1,5 +1,5 @@
 # VAC Project LOCATION
-Select the labs/project/ folder which will have all the project files. 
+Select the labs/project/ folder which will have all the project files. The instructions below also provide a quick way to enter it quickly by using the provided cd command.
 
 # VAC Project Setup
 To be able to run the code, the environment must be set up. The following steps explain how to setup this entire project in a NYU server. 
